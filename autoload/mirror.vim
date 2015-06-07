@@ -78,7 +78,7 @@ endfunction
 
 function! s:find_local_mirrors()
   let local_mirrors = getcwd() . '/.mirrors'
-  if filereadable(local_mirrors)
+  if filereadable(local_mirrors) && local_mirrors != g:mirrors_file
     return s:parse_local_mirrors(readfile(local_mirrors))
   endif
   return {}
