@@ -28,10 +28,10 @@ if exists('g:autoloaded_mirrors')
 endif
 let g:autoloaded_mirrors = 1
 
-let g:mirrors_file =  $HOME . '/.mirrors'
-let g:mirrors_dir_command = 'Unite'
+let g:mirrors#file =  $HOME . '/.mirrors'
+let g:mirrors#dir_command = 'Unite'
 
-function! s:parse_global_mirrors(list)
+function! s:parse_mirrors(list)
   let result = {}
   let current_node = ''
   for line in a:list
@@ -49,18 +49,6 @@ function! s:parse_global_mirrors(list)
   return result
 endfunction
 
-function! s:parse_local_mirrors(list)
-  let result = {}
-  for line in a:list
-    if empty(line) || match(line, '\s\*#') != -1
-      continue
-    endif
-      let [env, remote_path] = s:get_environment_and_path(line)
-      let result[env] = remote_path
-  endfor
-  return result
-endfunction
-
 function! s:get_environment_and_path(line)
   let [environment, remote_path] = split(a:line)
   let environment = substitute(environment, ':$', '', '')
@@ -70,16 +58,8 @@ function! s:get_environment_and_path(line)
 endfunction
 
 function! s:find_global_mirrors()
-  if filereadable(g:mirrors_file)
-    return s:parse_global_mirrors(readfile(g:mirrors_file))
-  endif
-  return {}
-endfunction
-
-function! s:find_local_mirrors()
-  let local_mirrors = getcwd() . '/.mirrors'
-  if filereadable(local_mirrors) && local_mirrors != g:mirrors_file
-    return s:parse_local_mirrors(readfile(local_mirrors))
+  if filereadable(g:mirrors#file)
+    return s:parse_mirrors(readfile(g:mirrors#file))
   endif
   return {}
 endfunction
@@ -106,18 +86,16 @@ function! s:find_remote_path(project, env, mirrors)
   endif
 endfunction
 
-function! mirror#open(is_file, command, ...)
-  let env = empty(a:0) ? 'default' : a:0
+function! s:get_default_env(project)
+  " TODO implement Menv and cache for default env
+  return 'default'
+endfunction
+
+function! mirror#open(is_file, command)
   let local_path = '/' . expand(@%)
   let project = s:current_project()
   let mirrors = s:find_global_mirrors()
-  let local_mirrors = s:find_local_mirrors()
-
-  if has_key(mirrors, project)
-    call extend(mirrors[project], local_mirrors)
-  else
-    let mirrors[project] = local_mirrors
-  endif
+  let env = s:get_default_env(project)
 
   let remote_path = s:find_remote_path(project, env, mirrors)
   if !empty(remote_path)
@@ -130,13 +108,8 @@ function! mirror#open(is_file, command, ...)
   endif
 endfunction
 
-function! mirror#edit_global_mirrors()
-  execute ':botright split' g:mirrors_file
-endfunction
-
-function! mirror#edit_local_mirrors()
-  let local_mirrors = getcwd() . '/.mirrors'
-  execute ':botright split' local_mirrors
+function! mirror#edit_config()
+  execute ':botright split' g:mirrors#file
 endfunction
 
 " vim: foldmethod=marker

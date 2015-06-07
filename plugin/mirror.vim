@@ -23,11 +23,11 @@
 " }}}
 "=============================================================================
 
-command! -nargs=? Emirror call mirror#open(1, 'edit', <f-args>)
-command! -nargs=? EVmirror call mirror#open(1, 'vsplit', <f-args>)
-command! -nargs=? ESmirror call mirror#open(1, 'split', <f-args>)
-command! -nargs=? Mirror call mirror#open(0, g:mirrors_dir_command, <f-args>)
-command! EditGlobalMirrors call mirror#edit_global_mirrors()
-command! EditLocalMirrors call mirror#edit_local_mirrors()
+" TODO Menv, Mexec
+command! Medit   call mirror#open(1, 'edit')
+command! MVedit  call mirror#open(1, 'vsplit')
+command! MSedit  call mirror#open(1, 'split')
+command! Mopen   call mirror#open(0, g:mirrors#dir_command)
+command! Mconfig call mirror#edit_config()
 
 " vim: foldmethod=marker
