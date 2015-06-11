@@ -23,13 +23,13 @@
 " }}}
 "=============================================================================
 
-if exists('g:autoloaded_mirrors')
+if exists('g:autoloaded_mirror')
   finish
 endif
-let g:autoloaded_mirrors = 1
+let g:autoloaded_mirror = 1
 
-let g:mirrors#file =  $HOME . '/.mirrors'
-let g:mirrors#dir_command = 'Unite'
+let g:mirror#config_path =  $HOME . '/.mirrors'
+let g:mirror#open_with = 'Unite'
 
 function! s:parse_mirrors(list)
   let result = {}
@@ -58,8 +58,8 @@ function! s:get_environment_and_path(line)
 endfunction
 
 function! s:find_global_mirrors()
-  if filereadable(g:mirrors#file)
-    return s:parse_mirrors(readfile(g:mirrors#file))
+  if filereadable(g:mirror#config_path)
+    return s:parse_mirrors(readfile(g:mirror#config_path))
   endif
   return {}
 endfunction
@@ -109,7 +109,7 @@ function! mirror#open(is_file, command)
 endfunction
 
 function! mirror#edit_config()
-  execute ':botright split' g:mirrors#file
+  execute ':botright split' g:mirror#config_path
 endfunction
 
 " vim: foldmethod=marker

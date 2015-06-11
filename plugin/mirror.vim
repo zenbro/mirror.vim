@@ -23,11 +23,17 @@
 " }}}
 "=============================================================================
 
-" TODO Menv, Mexec
-command! Medit   call mirror#open(1, 'edit')
-command! MVedit  call mirror#open(1, 'vsplit')
-command! MSedit  call mirror#open(1, 'split')
-command! Mopen   call mirror#open(0, g:mirrors#dir_command)
-command! Mconfig call mirror#edit_config()
+" TODO
+" MirrorEnvironment <env> - set default environment for this session
+" MirrorEnvironment! <env> - set default environment and save it
+" MirrorRun <env> - run shell command remotely
+" MirrorPush <env> - update remote file from local changes
+" MirrorPull <env> - update local file from remote changes
+" MirrorParentDirectory <env> - like MirrorOpen, but for currently open file
+command! MirrorEdit   call mirror#open(1, 'edit')
+command! MirrorVEdit  call mirror#open(1, 'vsplit')
+command! MirrorSEdit  call mirror#open(1, 'split')
+command! MirrorOpen   call mirror#open(0, g:mirror#open_with)
+command! MirrorConfig call mirror#edit_config()
 
 " vim: foldmethod=marker
