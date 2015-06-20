@@ -30,6 +30,7 @@ let g:autoloaded_mirror = 1
 
 let g:mirror#config_path = get(g:, 'mirror#config_path', $HOME . '/.mirrors')
 let g:mirror#open_with = get(g:, 'mirror#open_with', 'Unite')
+let g:mirror#diff_layout = get(g:, 'g:mirror#diff_layout', 'vsplit')
 let g:mirror#cache_dir = get(
       \ g:, 'mirror#cache_dir',
       \ $HOME . '/.cache/mirror.vim'
@@ -116,26 +117,37 @@ endfunction
 function! s:OpenFile(env, command)
   let [local_path, remote_path] = s:FindPaths(a:env)
   let full_path = remote_path . local_path
-  echo 'Opening' full_path . '...'
   execute ':' . a:command full_path
 endfunction
 
+" Find buffer that starts with 'ssh://' and delete it
+function! mirror#CloseRemoteBuffer()
+  execute ':bdelete' bufnr('^ssh://')
+endfunction
+
+" Open diff with remote file for given env
+function! s:OpenDiff(env, command)
+  let full_path = s:OpenFile(a:env, a:command)
+  windo diffthis
+endfunction
+
 " Open directory via ssh for given env
-function! s:OpenDir(env, command)
+function! s:OpenDir(env)
   let [_, remote_path] = s:FindPaths(a:env)
-  echo 'Opening' remote_path . '...'
   " TODO check g:mirror#open_with existence
   execute ':' . a:command remote_path
 endfunction
 
-" Do some remote actions
+" Do remote action of given type
 function! mirror#Do(env, type, command)
   let env = s:ChooseEnv(a:env)
   if !empty(env)
     if a:type ==# 'file'
       call s:OpenFile(env, a:command)
     elseif a:type ==# 'dir'
-      call s:OpenDir(env, a:command)
+      call s:OpenDir(env)
+    elseif a:type ==# 'diff'
+      call s:OpenDiff(env, a:command)
     endif
   endif
 endfunction
@@ -219,8 +231,17 @@ function! mirror#InitForBuffer(current_project)
         \ call mirror#Do(<q-args>, 'file', 'vsplit')
   command! -buffer -complete=customlist,s:EnvCompletion -nargs=? MirrorSEdit
         \ call mirror#Do(<q-args>, 'file', 'split')
+
   command! -buffer -complete=customlist,s:EnvCompletion -nargs=? MirrorOpen
         \ call mirror#Do(<q-args>, 'dir', g:mirror#open_with)
+
+  command! -buffer -complete=customlist,s:EnvCompletion -nargs=? MirrorDiff
+        \ call mirror#Do(<q-args>, 'diff', g:mirror#diff_layout)
+  command! -buffer -complete=customlist,s:EnvCompletion -nargs=? MirrorVDiff
+        \ call mirror#Do(<q-args>, 'diff', 'vsplit')
+  command! -buffer -complete=customlist,s:EnvCompletion -nargs=? MirrorSDiff
+        \ call mirror#Do(<q-args>, 'diff', 'split')
+
   command! -buffer -bang -complete=customlist,s:EnvCompletion -nargs=?
         \ MirrorEnvironment call mirror#SetDefaultEnv(<q-args>, <bang>0)
 endfunction

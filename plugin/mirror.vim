@@ -49,10 +49,10 @@ augroup END
 " MirrorPush <env> - update remote file from local changes
 " MirrorPull <env> - update local file from remote changes
 " MirrorParentDirectory <env> - like MirrorOpen, but for currently open file
-" MirrorDiff <env>
-" MirrorSDiff <env>
-" MirrorVDiff <env>
 command! MirrorConfig call mirror#EditConfig()
 command! MirrorDetect call DetectProjectWithMirror()
+
+nnoremap <silent> <Plug>(mirror_close_remote_buffer)
+      \ :call mirror#CloseRemoteBuffer()<CR>
 
 " vim: foldmethod=marker
