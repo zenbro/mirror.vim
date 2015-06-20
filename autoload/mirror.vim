@@ -30,11 +30,26 @@ let g:autoloaded_mirror = 1
 
 let g:mirror#config_path = get(g:, 'mirror#config_path', $HOME . '/.mirrors')
 let g:mirror#open_with = get(g:, 'mirror#open_with', 'Unite')
+let g:mirror#cache_dir = get(
+      \ g:, 'mirror#cache_dir',
+      \ $HOME . '/.cache/mirror.vim'
+      \ )
+
 let g:mirror#config = {}
 let g:mirror#local_default_environments = {}
 let g:mirror#global_default_environments = {}
 
-function! s:parse_mirrors(list)
+" Parse line like 'environment: remote_path'
+function! s:GetEnvironmentAndPath(line)
+  let [environment, remote_path] = split(a:line)
+  let environment = substitute(environment, ':$', '', '')
+  let remote_path = substitute(remote_path, '\s', '', 'g')
+  let remote_path = substitute(remote_path, '/$', '', '')
+  return [environment, remote_path]
+endfunction
+
+" Parse lines from mirrors config, return dictionary
+function! s:ParseMirrors(list)
   let result = {}
   let current_node = ''
   for line in a:list
@@ -45,104 +60,125 @@ function! s:parse_mirrors(list)
       let current_node = substitute(line, ':$', '', '')
       let result[current_node] = {}
     else
-      let [env, remote_path] = s:get_environment_and_path(line)
+      let [env, remote_path] = s:GetEnvironmentAndPath(line)
       let result[current_node][env] = remote_path
     endif
   endfor
   return result
 endfunction
 
-function! s:get_environment_and_path(line)
-  let [environment, remote_path] = split(a:line)
-  let environment = substitute(environment, ':$', '', '')
-  let remote_path = substitute(remote_path, '\s', '', 'g')
-  let remote_path = substitute(remote_path, '/$', '', '')
-  return [environment, remote_path]
-endfunction
-
-function! mirror#read_config()
+" Read mirrors config into memory
+function! mirror#ReadConfig()
   if filereadable(g:mirror#config_path)
-    let g:mirror#config = s:parse_mirrors(readfile(g:mirror#config_path))
+    let g:mirror#config = s:ParseMirrors(readfile(g:mirror#config_path))
   endif
   return g:mirror#config
 endfunction
 
-function! s:current_project()
-  return 
+" Read cache file into memory
+function! mirror#ReadCache()
+  let path = g:mirror#cache_dir . '/default_environments'
+  if filereadable(path)
+    let default_environments = eval(readfile(path)[0])
+    if type(default_environments) ==# type({})
+      let g:mirror#global_default_environments = default_environments
+    endif
+  endif
 endfunction
 
-function! s:prepend_ssh(string)
+" Save global environment sessions into cache file
+function! s:UpdateCache()
+  if !isdirectory(g:mirror#cache_dir)
+    call mkdir(g:mirror#cache_dir, 'p')
+  endif
+  call writefile(
+        \ [string(g:mirror#global_default_environments)],
+        \ g:mirror#cache_dir . '/default_environments'
+        \ )
+endfunction
+
+" Add ssh:// to given string
+function! s:PrependProtocol(string)
   if stridx(a:string, 'ssh://') == -1
     return 'ssh://' . a:string
   endif
   return a:string
 endfunction
 
-function! s:find_remote_path(project, env, mirrors)
-  if has_key(a:mirrors, a:project)
-    let project_mirrors = get(a:mirrors, a:project)
-    if has_key(project_mirrors, a:env)
-      return s:prepend_ssh(get(project_mirrors, a:env))
-    elseif a:env ==# 'default' && len(project_mirrors) == 1
-      return s:prepend_ssh(values(project_mirrors)[0])
+" Find local path of current file and remote path for current project
+function! s:FindPaths(env)
+  let local_path = '/' . expand(@%)
+  let remote_path = s:PrependProtocol(get(s:CurrentMirrors(), a:env))
+  return [local_path, remote_path]
+endfunction
+
+" Open file via ssh for given env
+function! s:OpenFile(env, command)
+  let [local_path, remote_path] = s:FindPaths(a:env)
+  let full_path = remote_path . local_path
+  echo 'Opening' full_path . '...'
+  execute ':' . a:command full_path
+endfunction
+
+" Open directory via ssh for given env
+function! s:OpenDir(env, command)
+  let [_, remote_path] = s:FindPaths(a:env)
+  echo 'Opening' remote_path . '...'
+  " TODO check g:mirror#open_with existence
+  execute ':' . a:command remote_path
+endfunction
+
+" Do some remote actions
+function! mirror#Do(env, type, command)
+  let env = s:ChooseEnv(a:env)
+  if !empty(env)
+    if a:type ==# 'file'
+      call s:OpenFile(env, a:command)
+    elseif a:type ==# 'dir'
+      call s:OpenDir(env, a:command)
     endif
   endif
 endfunction
 
-function! s:get_default_env(project)
-  " TODO implement Menv and cache for default env
-  return 'default'
-endfunction
-
-function! mirror#open(is_file, command)
-  let local_path = '/' . expand(@%)
-  let project = s:current_project()
-  let mirrors = s:find_global_mirrors()
-  let env = s:get_default_env(project)
-
-  let remote_path = s:find_remote_path(project, env, mirrors)
-  if !empty(remote_path)
-    let full_path = a:is_file ? remote_path . local_path : remote_path
-    echo 'Opening' full_path . '...'
-    execute ':' . a:command full_path
-    echo
-  else
-    echo 'Can''t find any mirror for this project' '('.project.')...'
-  endif
-endfunction
-
-function! mirror#edit_config()
+" Open mirrors config in split
+function! mirror#EditConfig()
   execute ':botright split' g:mirror#config_path
 endfunction
 
-function! mirror#init(current_project)
-  let b:project_with_mirror = a:current_project
-  command! -buffer -complete=customlist,EnvCompletion -nargs=1 MirrorEdit
-        \ call mirror#open(1, 'edit')
-  command! -buffer -complete=customlist,EnvCompletion -nargs=1 MirrorVEdit
-        \ call mirror#open(1, 'vsplit')
-  command! -buffer -complete=customlist,EnvCompletion -nargs=1 MirrorSEdit
-        \ call mirror#open(1, 'split')
-  command! -buffer -complete=customlist,EnvCompletion -nargs=1 MirrorOpen
-        \ call mirror#open(0, g:mirror#open_with)
-
-  command! -buffer -bang -complete=customlist,EnvCompletion -nargs=?
-        \ MirrorEnvironment call mirror#SetDefaultEnv(<q-args>, <bang>0)
+" Set default environment for current session or globally
+function! mirror#SetDefaultEnv(env, global)
+  let env = s:ChooseEnv(a:env)
+  if !empty(env)
+    let g:mirror#local_default_environments[b:project_with_mirror] = env
+    if a:global
+      let g:mirror#global_default_environments[b:project_with_mirror] = env
+      call s:UpdateCache()
+    endif
+    echo b:project_with_mirror . ':' env
+  endif
 endfunction
 
-function! mirror#SetDefaultEnv(env, global)
+" Return dictionary from current project config
+function! s:CurrentMirrors()
+  return get(g:mirror#config, b:project_with_mirror, {})
+endfunction
+
+" Check selected environment for existence and return it
+function! s:ChooseEnv(env)
   let default_env = s:FindDefaultEnv()
-  if empty(a:env) && empty(default_env)
-    echo 'Default env for' '"' . b:project_with_mirror . '" didn''t set yet...'
+  if empty(s:CurrentMirrors())
+    echo 'Project' '"' . b:project_with_mirror . '"'
+          \ 'doesn''t have any environments'
+          \ '(' . g:mirror#config_path . ')'
+  elseif empty(a:env) && empty(default_env)
+    echo 'Can''t find default environment for'
+          \'"' . b:project_with_mirror . '"...'
+  " env is not given - using default env for current project
   elseif empty(a:env) && !empty(default_env)
-    echo b:project_with_mirror . ':' default_env
+    return default_env
   elseif !empty(a:env)
     if has_key(s:CurrentMirrors(), a:env)
-      let g:mirror#local_default_environments[b:project_with_mirror] = a:env
-      if a:global
-        let g:mirror#global_default_environments[b:project_with_mirror] = a:env
-      endif
-      echo b:project_with_mirror . ':' a:env
+      return a:env
     else
       echo 'Environment with name' '"' . a:env . '"'
             \ 'not found in project' '"' . b:project_with_mirror . '"'
@@ -151,26 +187,42 @@ function! mirror#SetDefaultEnv(env, global)
   endif
 endfunction
 
-function! s:CurrentMirrors()
-  return get(g:mirror#config, b:project_with_mirror, {})
-endfunction
-
+" Find default environment for current project
 function! s:FindDefaultEnv()
   let default = ''
   if !empty(s:CurrentMirrors())
+    " look for local defaults environments
     let default = get(g:mirror#local_default_environments, b:project_with_mirror, '')
     if empty(default)
+      " look for global defaults environments
       let default = get(g:mirror#global_default_environments, b:project_with_mirror, '')
     endif
     if empty(default) && len(keys(s:CurrentMirrors())) ==# 1
-      let default = values(s:CurrentMirrors())[0]
+      " if project contain only 1 environment - use it as default
+      let default = keys(s:CurrentMirrors())[0]
     endif
   endif
   return default
 endfunction
 
-function! EnvCompletion(...)
+" Return list of available environments for current projects
+function! s:EnvCompletion(...)
   return keys(s:CurrentMirrors())
+endfunction
+
+" Add Mirror* commands for current buffer
+function! mirror#InitForBuffer(current_project)
+  let b:project_with_mirror = a:current_project
+  command! -buffer -complete=customlist,s:EnvCompletion -nargs=? MirrorEdit
+        \ call mirror#Do(<q-args>, 'file', 'edit')
+  command! -buffer -complete=customlist,s:EnvCompletion -nargs=? MirrorVEdit
+        \ call mirror#Do(<q-args>, 'file', 'vsplit')
+  command! -buffer -complete=customlist,s:EnvCompletion -nargs=? MirrorSEdit
+        \ call mirror#Do(<q-args>, 'file', 'split')
+  command! -buffer -complete=customlist,s:EnvCompletion -nargs=? MirrorOpen
+        \ call mirror#Do(<q-args>, 'dir', g:mirror#open_with)
+  command! -buffer -bang -complete=customlist,s:EnvCompletion -nargs=?
+        \ MirrorEnvironment call mirror#SetDefaultEnv(<q-args>, <bang>0)
 endfunction
 
 " vim: foldmethod=marker

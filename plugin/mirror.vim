@@ -26,16 +26,16 @@
 function! DetectProjectWithMirror()
   let current_project = split(getcwd(), '/')[-1]
   if has_key(g:mirror#config, current_project)
-    call mirror#init(current_project)
+    call mirror#InitForBuffer(current_project)
     return 1
   endif
 endfunction
 
-augroup updateMirrorConfig
+augroup updateMirrorConfigAndCache
   autocmd!
-  autocmd VimEnter * call mirror#read_config()
+  autocmd VimEnter * call mirror#ReadConfig() | call mirror#ReadCache()
   execute 'autocmd BufWritePost' g:mirror#config_path
-    \ 'call mirror#read_config() | '
+    \ 'call mirror#ReadConfig() | '
     \ 'call DetectProjectWithMirror()'
 augroup END
 
@@ -45,8 +45,6 @@ augroup projectWithMirrorDetect
 augroup END
 
 " TODO
-" MirrorEnvironment <env> - set default environment for this session
-" MirrorEnvironment! <env> - set default environment and save it
 " MirrorRun <env> - run shell command remotely
 " MirrorPush <env> - update remote file from local changes
 " MirrorPull <env> - update local file from remote changes
@@ -54,13 +52,7 @@ augroup END
 " MirrorDiff <env>
 " MirrorSDiff <env>
 " MirrorVDiff <env>
-" command! MirrorEdit   call mirror#open(1, 'edit')
-" command! MirrorVEdit  call mirror#open(1, 'vsplit')
-" command! MirrorSEdit  call mirror#open(1, 'split')
-" command! MirrorOpen   call mirror#open(0, g:mirror#open_with)
-command! MirrorConfig call mirror#edit_config()
+command! MirrorConfig call mirror#EditConfig()
 command! MirrorDetect call DetectProjectWithMirror()
-
-" TODO первая буква у всех функций в mirror# - заглавная
 
 " vim: foldmethod=marker

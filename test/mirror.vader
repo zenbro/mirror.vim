@@ -3,7 +3,7 @@ Before:
 
 Execute (Parsing config that doesn't exists):
   let g:mirror#config_path = 'tmp/mirror' . tempname()
-  AssertEqual {}, mirror#read_config(), 'new mirror config should be empty'
+  AssertEqual {}, mirror#ReadConfig(), 'new mirror config should be empty'
 
 Execute (Parsing valid config):
   let valid_config = {
@@ -12,7 +12,7 @@ Execute (Parsing valid config):
     \   'staging': 'some/staging/path',
     \   'development': 'some/development/path'}
     \ }
-  AssertEqual valid_config, mirror#read_config()
+  AssertEqual valid_config, mirror#ReadConfig()
 
 Execute (Detect existing project):
   Assert DetectProjectWithMirror()
@@ -27,5 +27,5 @@ Execute (Set default environment for current session):
   AssertEqual 'development', mirror#local_default_environments['test']
 
 Execute (Set default environment globally):
-  MirrorEnvironment development
+  MirrorEnvironment! development
   AssertEqual 'development', mirror#global_default_environments['test']
