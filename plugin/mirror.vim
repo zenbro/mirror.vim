@@ -48,7 +48,6 @@ augroup END
 
 " TODO
 " MirrorRun <env> - run shell command remotely
-" MirrorPull <env> - update local file from remote changes
 " MirrorParentDirectory <env> - like MirrorOpen, but for currently open file
 command! MirrorConfig call mirror#EditConfig()
 command! MirrorDetect call DetectProjectWithMirror()

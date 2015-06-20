@@ -127,29 +127,48 @@ endfunction
 
 " Open diff with remote file for given env
 function! s:OpenDiff(env, command)
-  let full_path = s:OpenFile(a:env, a:command)
+  call s:OpenFile(a:env, a:command)
   windo diffthis
 endfunction
 
 " Open directory via ssh for given env
-function! s:OpenDir(env)
+function! s:OpenDir(env, command)
   let [remote_path, _] = s:FindPaths(a:env)
   " TODO check g:mirror#open_with existence
   execute ':' . a:command remote_path
 endfunction
 
 " Overwrite remote file with currently opened file
-function! s:CopyFile(env)
+function! s:PushFile(env)
   let local_file = fnamemodify(expand(@%), ':p')
   let local_dir = fnamemodify(expand(@%), ':h')
   let remote_path = s:PrependProtocol(get(s:CurrentMirrors(), a:env))
   let remote_path .= '/' . local_dir
   let [port, dest_dir] = unite#sources#ssh#parse_action_path(remote_path)
 
+  " scp -P PORT -q local_file remote_file
   if unite#kinds#file_ssh#external('copy_file', port, dest_dir, [local_file])
     echo unite#util#get_last_errmsg()
   else
     echo 'Pushed to' join(s:FindPaths(a:env), '')
+  endif
+endfunction
+
+" Overwrite local file by remote_file
+function! s:PullFile(env)
+  let [remote_path, local_path] = s:FindPaths(a:env)
+  let full_path = remote_path . local_path
+  let [port, remote_file] = unite#sources#ssh#parse_action_path(full_path)
+  let local_file = fnamemodify(expand(@%), ':p')
+
+  " scp -P PORT -q remote_file local_file
+  if unite#kinds#file_ssh#external('copy_file', port, local_file,
+        \[remote_file])
+    echo unite#util#get_last_errmsg()
+  else
+    " reopen file
+    edit!
+    echo 'Pulled from' full_path
   endif
 endfunction
 
@@ -160,11 +179,13 @@ function! mirror#Do(env, type, command)
     if a:type ==# 'file'
       call s:OpenFile(env, a:command)
     elseif a:type ==# 'dir'
-      call s:OpenDir(env)
+      call s:OpenDir(env, a:command)
     elseif a:type ==# 'diff'
       call s:OpenDiff(env, a:command)
     elseif a:type ==# 'push'
-      call s:CopyFile(env)
+      call s:PushFile(env)
+    elseif a:type ==# 'pull'
+      call s:PullFile(env)
     endif
   endif
 endfunction
@@ -183,7 +204,8 @@ function! mirror#SetDefaultEnv(env, global)
       let g:mirror#global_default_environments[b:project_with_mirror] = env
       call s:UpdateCache()
     endif
-    echo b:project_with_mirror . ':' env
+    let remote_path = get(s:CurrentMirrors(), env)
+    echo b:project_with_mirror . ':' env '(' . remote_path . ')'
   endif
 endfunction
 
@@ -261,6 +283,8 @@ function! mirror#InitForBuffer(current_project)
 
   command! -buffer -complete=customlist,s:EnvCompletion -nargs=? MirrorPush
         \ call mirror#Do(<q-args>, 'push', '')
+  command! -buffer -complete=customlist,s:EnvCompletion -nargs=? MirrorPull
+        \ call mirror#Do(<q-args>, 'pull', '')
 
   command! -buffer -bang -complete=customlist,s:EnvCompletion -nargs=?
         \ MirrorEnvironment call mirror#SetDefaultEnv(<q-args>, <bang>0)
