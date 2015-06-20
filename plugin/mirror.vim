@@ -61,4 +61,6 @@ augroup END
 command! MirrorConfig call mirror#edit_config()
 command! MirrorDetect call DetectProjectWithMirror()
 
+" TODO первая буква у всех функций в mirror# - заглавная
+
 " vim: foldmethod=marker

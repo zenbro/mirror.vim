@@ -114,11 +114,19 @@ function! mirror#edit_config()
 endfunction
 
 function! mirror#init(current_project)
-  echo 'init! for ' . a:current_project
-  command! -buffer MirrorEdit   call mirror#open(1, 'edit')
-  command! -buffer MirrorVEdit  call mirror#open(1, 'vsplit')
-  command! -buffer MirrorSEdit  call mirror#open(1, 'split')
-  command! -buffer MirrorOpen   call mirror#open(0, g:mirror#open_with)
+  let b:project_with_mirror = a:current_project
+  command! -buffer -complete=customlist,EnvCompletion -nargs=1 MirrorEdit
+        \ call mirror#open(1, 'edit')
+  command! -buffer -complete=customlist,EnvCompletion -nargs=1 MirrorVEdit
+        \ call mirror#open(1, 'vsplit')
+  command! -buffer -complete=customlist,EnvCompletion -nargs=1 MirrorSEdit
+        \ call mirror#open(1, 'split')
+  command! -buffer -complete=customlist,EnvCompletion -nargs=1 MirrorOpen
+        \ call mirror#open(0, g:mirror#open_with)
+endfunction
+
+function! EnvCompletion(...)
+  return keys(get(g:mirror#config, b:project_with_mirror, {}))
 endfunction
 
 " vim: foldmethod=marker
