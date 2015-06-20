@@ -1,0 +1,23 @@
+Before:
+  let g:mirror#config_path = 'fixtures/mirrors'
+
+Execute (Parsing config that doesn't exists):
+  let g:mirror#config_path = 'tmp/mirror' . tempname()
+  AssertEqual {}, mirror#read_config(), 'new mirror config should be empty'
+
+Execute (Parsing valid config):
+  let valid_config = {
+    \ 'test': {
+    \   'production': 'some/production/path',
+    \   'staging': 'some/staging/path',
+    \   'development': 'some/development/path'}
+    \ }
+  AssertEqual valid_config, mirror#read_config()
+
+Execute (Detect existing project):
+  Assert DetectProjectWithMirror()
+
+Execute (Detect project, that doesn't exists):
+  cd /tmp
+  Assert !DetectProjectWithMirror()
+  cd -

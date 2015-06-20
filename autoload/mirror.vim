@@ -28,8 +28,9 @@ if exists('g:autoloaded_mirror')
 endif
 let g:autoloaded_mirror = 1
 
-let g:mirror#config_path =  $HOME . '/.mirrors'
-let g:mirror#open_with = 'Unite'
+let g:mirror#config_path = get(g:, 'mirror#config_path', $HOME . '/.mirrors')
+let g:mirror#open_with = get(g:, 'mirror#open_with', 'Unite')
+let g:mirror#config = {}
 
 function! s:parse_mirrors(list)
   let result = {}
@@ -57,15 +58,15 @@ function! s:get_environment_and_path(line)
   return [environment, remote_path]
 endfunction
 
-function! s:find_global_mirrors()
+function! mirror#read_config()
   if filereadable(g:mirror#config_path)
-    return s:parse_mirrors(readfile(g:mirror#config_path))
+    let g:mirror#config = s:parse_mirrors(readfile(g:mirror#config_path))
   endif
-  return {}
+  return g:mirror#config
 endfunction
 
 function! s:current_project()
-  return split(getcwd(), '/')[-1]
+  return 
 endfunction
 
 function! s:prepend_ssh(string)
@@ -110,6 +111,14 @@ endfunction
 
 function! mirror#edit_config()
   execute ':botright split' g:mirror#config_path
+endfunction
+
+function! mirror#init(current_project)
+  echo 'init! for ' . a:current_project
+  command! -buffer MirrorEdit   call mirror#open(1, 'edit')
+  command! -buffer MirrorVEdit  call mirror#open(1, 'vsplit')
+  command! -buffer MirrorSEdit  call mirror#open(1, 'split')
+  command! -buffer MirrorOpen   call mirror#open(0, g:mirror#open_with)
 endfunction
 
 " vim: foldmethod=marker
