@@ -31,6 +31,8 @@ let g:autoloaded_mirror = 1
 let g:mirror#config_path = get(g:, 'mirror#config_path', $HOME . '/.mirrors')
 let g:mirror#open_with = get(g:, 'mirror#open_with', 'Unite')
 let g:mirror#config = {}
+let g:mirror#local_default_environments = {}
+let g:mirror#global_default_environments = {}
 
 function! s:parse_mirrors(list)
   let result = {}
@@ -123,10 +125,52 @@ function! mirror#init(current_project)
         \ call mirror#open(1, 'split')
   command! -buffer -complete=customlist,EnvCompletion -nargs=1 MirrorOpen
         \ call mirror#open(0, g:mirror#open_with)
+
+  command! -buffer -bang -complete=customlist,EnvCompletion -nargs=?
+        \ MirrorEnvironment call mirror#SetDefaultEnv(<q-args>, <bang>0)
+endfunction
+
+function! mirror#SetDefaultEnv(env, global)
+  let default_env = s:FindDefaultEnv()
+  if empty(a:env) && empty(default_env)
+    echo 'Default env for' '"' . b:project_with_mirror . '" didn''t set yet...'
+  elseif empty(a:env) && !empty(default_env)
+    echo b:project_with_mirror . ':' default_env
+  elseif !empty(a:env)
+    if has_key(s:CurrentMirrors(), a:env)
+      let g:mirror#local_default_environments[b:project_with_mirror] = a:env
+      if a:global
+        let g:mirror#global_default_environments[b:project_with_mirror] = a:env
+      endif
+      echo b:project_with_mirror . ':' a:env
+    else
+      echo 'Environment with name' '"' . a:env . '"'
+            \ 'not found in project' '"' . b:project_with_mirror . '"'
+            \ '(' . g:mirror#config_path . ')'
+    endif
+  endif
+endfunction
+
+function! s:CurrentMirrors()
+  return get(g:mirror#config, b:project_with_mirror, {})
+endfunction
+
+function! s:FindDefaultEnv()
+  let default = ''
+  if !empty(s:CurrentMirrors())
+    let default = get(g:mirror#local_default_environments, b:project_with_mirror, '')
+    if empty(default)
+      let default = get(g:mirror#global_default_environments, b:project_with_mirror, '')
+    endif
+    if empty(default) && len(keys(s:CurrentMirrors())) ==# 1
+      let default = values(s:CurrentMirrors())[0]
+    endif
+  endif
+  return default
 endfunction
 
 function! EnvCompletion(...)
-  return keys(get(g:mirror#config, b:project_with_mirror, {}))
+  return keys(s:CurrentMirrors())
 endfunction
 
 " vim: foldmethod=marker
