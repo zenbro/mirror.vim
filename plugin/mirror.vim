@@ -33,7 +33,9 @@ endfunction
 
 augroup updateMirrorConfigAndCache
   autocmd!
-  autocmd VimEnter * call mirror#ReadConfig() | call mirror#ReadCache()
+  autocmd VimEnter * call mirror#ReadConfig() |
+        \ call mirror#ReadCache() |
+        \ call DetectProjectWithMirror()
   execute 'autocmd BufWritePost' g:mirror#config_path
     \ 'call mirror#ReadConfig() | '
     \ 'call DetectProjectWithMirror()'
@@ -46,7 +48,6 @@ augroup END
 
 " TODO
 " MirrorRun <env> - run shell command remotely
-" MirrorPush <env> - update remote file from local changes
 " MirrorPull <env> - update local file from remote changes
 " MirrorParentDirectory <env> - like MirrorOpen, but for currently open file
 command! MirrorConfig call mirror#EditConfig()

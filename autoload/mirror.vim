@@ -110,12 +110,12 @@ endfunction
 function! s:FindPaths(env)
   let local_path = '/' . expand(@%)
   let remote_path = s:PrependProtocol(get(s:CurrentMirrors(), a:env))
-  return [local_path, remote_path]
+  return [remote_path, local_path]
 endfunction
 
 " Open file via ssh for given env
 function! s:OpenFile(env, command)
-  let [local_path, remote_path] = s:FindPaths(a:env)
+  let [remote_path, local_path] = s:FindPaths(a:env)
   let full_path = remote_path . local_path
   execute ':' . a:command full_path
 endfunction
@@ -133,9 +133,24 @@ endfunction
 
 " Open directory via ssh for given env
 function! s:OpenDir(env)
-  let [_, remote_path] = s:FindPaths(a:env)
+  let [remote_path, _] = s:FindPaths(a:env)
   " TODO check g:mirror#open_with existence
   execute ':' . a:command remote_path
+endfunction
+
+" Overwrite remote file with currently opened file
+function! s:CopyFile(env)
+  let local_file = fnamemodify(expand(@%), ':p')
+  let local_dir = fnamemodify(expand(@%), ':h')
+  let remote_path = s:PrependProtocol(get(s:CurrentMirrors(), a:env))
+  let remote_path .= '/' . local_dir
+  let [port, dest_dir] = unite#sources#ssh#parse_action_path(remote_path)
+
+  if unite#kinds#file_ssh#external('copy_file', port, dest_dir, [local_file])
+    echo unite#util#get_last_errmsg()
+  else
+    echo 'Pushed to' join(s:FindPaths(a:env), '')
+  endif
 endfunction
 
 " Do remote action of given type
@@ -148,6 +163,8 @@ function! mirror#Do(env, type, command)
       call s:OpenDir(env)
     elseif a:type ==# 'diff'
       call s:OpenDiff(env, a:command)
+    elseif a:type ==# 'push'
+      call s:CopyFile(env)
     endif
   endif
 endfunction
@@ -241,6 +258,9 @@ function! mirror#InitForBuffer(current_project)
         \ call mirror#Do(<q-args>, 'diff', 'vsplit')
   command! -buffer -complete=customlist,s:EnvCompletion -nargs=? MirrorSDiff
         \ call mirror#Do(<q-args>, 'diff', 'split')
+
+  command! -buffer -complete=customlist,s:EnvCompletion -nargs=? MirrorPush
+        \ call mirror#Do(<q-args>, 'push', '')
 
   command! -buffer -bang -complete=customlist,s:EnvCompletion -nargs=?
         \ MirrorEnvironment call mirror#SetDefaultEnv(<q-args>, <bang>0)
