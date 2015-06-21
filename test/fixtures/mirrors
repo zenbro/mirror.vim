@@ -1,4 +1,0 @@
-test:
-  development: some/development/path
-  staging: some/staging/path
-  production: some/production/path

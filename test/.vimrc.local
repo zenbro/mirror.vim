@@ -1,5 +1,0 @@
-filetype off
-set runtimepath+=~/github/mirror.vim
-set runtimepath+=dependencies/vader.vim
-filetype plugin indent on
-syntax enable
