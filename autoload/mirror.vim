@@ -98,31 +98,53 @@ function! s:UpdateCache()
         \ )
 endfunction
 
-" Add ssh:// to given string
+" Add scp:// to given string
 function! s:PrependProtocol(string)
-  if stridx(a:string, 'ssh://') == -1
-    return 'ssh://' . a:string
+  if stridx(a:string, 'scp://') == -1
+    return 'scp://' . a:string
   endif
   return a:string
+endfunction
+
+function! s:ParseRemotePath(remote_path)
+  " scp://host:port/path
+  let m = matchlist(a:remote_path,'^scp://\(.\{-}\):\?\(\d\+\)\?/\(.\+\)$')
+  let host = m[1]
+  let port = m[2]
+  let path = m[3]
+  return [host, port, path]
+endfunction
+
+function! s:ScpCommand(port, src_path, dest_path)
+  let port = empty(a:port) ? '' : '-P ' . a:port
+  return printf('scp %s -q %s %s', port, a:src_path, a:dest_path)
+endfunction
+
+function! s:PrepareToCopy(env)
+  let [local_path, remote_path] = s:FindPaths(a:env)
+  let [host, port, path] = s:ParseRemotePath(remote_path . local_path)
+  let remote_file = printf('%s:%s', host, path)
+  let local_file = fnamemodify(expand(@%), ':p')
+  return [port, local_file, remote_file]
 endfunction
 
 " Find local path of current file and remote path for current project
 function! s:FindPaths(env)
   let local_path = '/' . expand(@%)
   let remote_path = s:PrependProtocol(get(s:CurrentMirrors(), a:env))
-  return [remote_path, local_path]
+  return [local_path, remote_path]
 endfunction
 
-" Open file via ssh for given env
+" Open file via scp for given env
 function! s:OpenFile(env, command)
-  let [remote_path, local_path] = s:FindPaths(a:env)
+  let [local_path, remote_path] = s:FindPaths(a:env)
   let full_path = remote_path . local_path
   execute ':' . a:command full_path
 endfunction
 
-" Find buffer that starts with 'ssh://' and delete it
+" Find buffer that starts with 'scp://' and delete it
 function! mirror#CloseRemoteBuffer()
-  execute ':bdelete' bufnr('^ssh://')
+  execute ':bdelete' bufnr('^scp://')
 endfunction
 
 " Open diff with remote file for given env
@@ -133,44 +155,26 @@ endfunction
 
 " Open directory via ssh for given env
 function! s:OpenDir(env, command)
-  let [remote_path, _] = s:FindPaths(a:env)
+  let [_, remote_path] = s:FindPaths(a:env)
   " TODO check g:mirror#open_with existence
   execute ':' . a:command remote_path
 endfunction
 
 " Overwrite remote file with currently opened file
 function! s:PushFile(env)
-  let [remote_path, local_path] = s:FindPaths(a:env)
-  let full_path = remote_path . local_path
-  let local_file = fnamemodify(expand(@%), ':p')
-  let local_dir = fnamemodify(expand(@%), ':h')
-  let remote_path .= '/' . local_dir
-  let [port, remote_file] = unite#sources#ssh#parse_action_path(remote_path)
-
-  " scp -P PORT -q local_file remote_file
-  if unite#kinds#file_ssh#external('copy_file',
-        \ port, remote_file, [local_file])
-    echo unite#util#get_last_errmsg()
-  else
-    echo 'Pushed to' full_path
+  let [port, local_file, remote_file] = s:PrepareToCopy(a:env)
+  execute '!' . s:ScpCommand(port, local_file, remote_file)
+  if !v:shell_error
+    echo 'Pushed to' remote_file
   endif
 endfunction
 
 " Overwrite local file by remote_file
 function! s:PullFile(env)
-  let [remote_path, local_path] = s:FindPaths(a:env)
-  let full_path = remote_path . local_path
-  let [port, remote_file] = unite#sources#ssh#parse_action_path(full_path)
-  let local_file = fnamemodify(expand(@%), ':p')
-
-  " scp -P PORT -q remote_file local_file
-  if unite#kinds#file_ssh#external('copy_file',
-        \ port, local_file, [remote_file])
-    echo unite#util#get_last_errmsg()
-  else
-    " reopen file
-    edit!
-    echo 'Pulled from' full_path
+  let [port, local_file, remote_file] = s:PrepareToCopy(a:env)
+  execute '!' . s:ScpCommand(port, remote_file, local_file)
+  if !v:shell_error
+    echo 'Pulled from' remote_file
   endif
 endfunction
 
