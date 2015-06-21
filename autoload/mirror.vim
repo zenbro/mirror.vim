@@ -140,17 +140,19 @@ endfunction
 
 " Overwrite remote file with currently opened file
 function! s:PushFile(env)
+  let [remote_path, local_path] = s:FindPaths(a:env)
+  let full_path = remote_path . local_path
   let local_file = fnamemodify(expand(@%), ':p')
   let local_dir = fnamemodify(expand(@%), ':h')
-  let remote_path = s:PrependProtocol(get(s:CurrentMirrors(), a:env))
   let remote_path .= '/' . local_dir
-  let [port, dest_dir] = unite#sources#ssh#parse_action_path(remote_path)
+  let [port, remote_file] = unite#sources#ssh#parse_action_path(remote_path)
 
   " scp -P PORT -q local_file remote_file
-  if unite#kinds#file_ssh#external('copy_file', port, dest_dir, [local_file])
+  if unite#kinds#file_ssh#external('copy_file',
+        \ port, remote_file, [local_file])
     echo unite#util#get_last_errmsg()
   else
-    echo 'Pushed to' join(s:FindPaths(a:env), '')
+    echo 'Pushed to' full_path
   endif
 endfunction
 
@@ -162,8 +164,8 @@ function! s:PullFile(env)
   let local_file = fnamemodify(expand(@%), ':p')
 
   " scp -P PORT -q remote_file local_file
-  if unite#kinds#file_ssh#external('copy_file', port, local_file,
-        \[remote_file])
+  if unite#kinds#file_ssh#external('copy_file',
+        \ port, local_file, [remote_file])
     echo unite#util#get_last_errmsg()
   else
     " reopen file
