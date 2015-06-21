@@ -24,10 +24,14 @@
 "=============================================================================
 
 function! DetectProjectWithMirror()
-  let current_project = split(getcwd(), '/')[-1]
-  if has_key(g:mirror#config, current_project)
-    call mirror#InitForBuffer(current_project)
-    return 1
+  let dirs = split(getcwd(), '/')
+  if !empty(dirs)
+    " use last dir in list as current project
+    let current_project = dirs[-1]
+    if has_key(g:mirror#config, current_project)
+      call mirror#InitForBuffer(current_project)
+      return 1
+    endif
   endif
 endfunction
 
