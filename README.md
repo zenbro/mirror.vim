@@ -6,7 +6,6 @@ Coming soon!
 
 - Write readme
 - Write doc file
-- Add completion for environments
 
 ## License
 

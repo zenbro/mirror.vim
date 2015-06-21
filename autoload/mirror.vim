@@ -29,7 +29,7 @@ endif
 let g:autoloaded_mirror = 1
 
 let g:mirror#config_path = get(g:, 'mirror#config_path', $HOME . '/.mirrors')
-let g:mirror#open_with = get(g:, 'mirror#open_with', 'Unite')
+let g:mirror#open_with = get(g:, 'mirror#open_with', 'Nread')
 let g:mirror#diff_layout = get(g:, 'g:mirror#diff_layout', 'vsplit')
 let g:mirror#cache_dir = get(
       \ g:, 'mirror#cache_dir',
@@ -106,6 +106,7 @@ function! s:PrependProtocol(string)
   return a:string
 endfunction
 
+" Extract host, port and path from remote_path
 function! s:ParseRemotePath(remote_path)
   " scp://host:port/path
   let m = matchlist(a:remote_path,'^scp://\(.\{-}\):\?\(\d\+\)\?/\(.\+\)$')
@@ -115,23 +116,28 @@ function! s:ParseRemotePath(remote_path)
   return [host, port, path]
 endfunction
 
+" Build scp command from args
 function! s:ScpCommand(port, src_path, dest_path)
   let port = empty(a:port) ? '' : '-P ' . a:port
   return printf('scp %s -q %s %s', port, a:src_path, a:dest_path)
 endfunction
 
+" Find port, local_file and remote_file for current environment
 function! s:PrepareToCopy(env)
   let [local_path, remote_path] = s:FindPaths(a:env)
   let [host, port, path] = s:ParseRemotePath(remote_path . local_path)
   let remote_file = printf('%s:%s', host, path)
-  let local_file = fnamemodify(expand(@%), ':p')
+  let local_file = fnamemodify(local_path, ':p')
   return [port, local_file, remote_file]
 endfunction
 
 " Find local path of current file and remote path for current project
 function! s:FindPaths(env)
-  let local_path = '/' . expand(@%)
+  let local_path = expand(@%)
   let remote_path = s:PrependProtocol(get(s:CurrentMirrors(), a:env))
+  if match(remote_path, '/$') < 0
+    let remote_path .= '/'
+  endif
   return [local_path, remote_path]
 endfunction
 
@@ -153,11 +159,31 @@ function! s:OpenDiff(env, command)
   windo diffthis
 endfunction
 
-" Open directory via ssh for given env
-function! s:OpenDir(env, command)
+" Open remote project directory for given env
+function! s:OpenProjectDir(env, command)
   let [_, remote_path] = s:FindPaths(a:env)
-  " TODO check g:mirror#open_with existence
   execute ':' . a:command remote_path
+endfunction
+
+" Open remote parent directory of currently opened file for given env
+function! s:OpenParentDir(env, command)
+  let [local_path, remote_path] = s:FindPaths(a:env)
+  let parent_directory = fnamemodify(local_path, ':h')
+  " parent directory is empty
+  if parent_directory ==# '.'
+    let parent_directory = ''
+  else
+    " required for netrw
+    let parent_directory .= '/'
+  endif
+  execute ':' . a:command remote_path . parent_directory
+endfunction
+
+" Open remote system root directory of for given env
+function! s:OpenRootDir(env, command)
+  let [_, remote_path] = s:FindPaths(a:env)
+  let [host, _, _] = s:ParseRemotePath(remote_path)
+  execute ':' . a:command printf('scp://%s//', host)
 endfunction
 
 " Overwrite remote file with currently opened file
@@ -174,25 +200,8 @@ function! s:PullFile(env)
   let [port, local_file, remote_file] = s:PrepareToCopy(a:env)
   execute '!' . s:ScpCommand(port, remote_file, local_file)
   if !v:shell_error
+    edit!
     echo 'Pulled from' remote_file
-  endif
-endfunction
-
-" Do remote action of given type
-function! mirror#Do(env, type, command)
-  let env = s:ChooseEnv(a:env)
-  if !empty(env)
-    if a:type ==# 'file'
-      call s:OpenFile(env, a:command)
-    elseif a:type ==# 'dir'
-      call s:OpenDir(env, a:command)
-    elseif a:type ==# 'diff'
-      call s:OpenDiff(env, a:command)
-    elseif a:type ==# 'push'
-      call s:PushFile(env)
-    elseif a:type ==# 'pull'
-      call s:PullFile(env)
-    endif
   endif
 endfunction
 
@@ -262,6 +271,28 @@ function! s:FindDefaultEnv()
   return default
 endfunction
 
+" Do remote action of given type
+function! mirror#Do(env, type, command)
+  let env = s:ChooseEnv(a:env)
+  if !empty(env)
+    if a:type ==# 'file'
+      call s:OpenFile(env, a:command)
+    elseif a:type ==# 'project_dir'
+      call s:OpenProjectDir(env, a:command)
+    elseif a:type ==# 'parent_dir'
+      call s:OpenParentDir(env, a:command)
+    elseif a:type ==# 'root_dir'
+      call s:OpenRootDir(env, a:command)
+    elseif a:type ==# 'diff'
+      call s:OpenDiff(env, a:command)
+    elseif a:type ==# 'push'
+      call s:PushFile(env)
+    elseif a:type ==# 'pull'
+      call s:PullFile(env)
+    endif
+  endif
+endfunction
+
 " Return list of available environments for current projects
 function! s:EnvCompletion(...)
   return keys(s:CurrentMirrors())
@@ -278,7 +309,11 @@ function! mirror#InitForBuffer(current_project)
         \ call mirror#Do(<q-args>, 'file', 'split')
 
   command! -buffer -complete=customlist,s:EnvCompletion -nargs=? MirrorOpen
-        \ call mirror#Do(<q-args>, 'dir', g:mirror#open_with)
+        \ call mirror#Do(<q-args>, 'project_dir', g:mirror#open_with)
+  command! -buffer -complete=customlist,s:EnvCompletion -nargs=? MirrorRoot
+        \ call mirror#Do(<q-args>, 'root_dir', g:mirror#open_with)
+  command! -buffer -complete=customlist,s:EnvCompletion -nargs=? MirrorParentDir
+        \ call mirror#Do(<q-args>, 'parent_dir', g:mirror#open_with)
 
   command! -buffer -complete=customlist,s:EnvCompletion -nargs=? MirrorDiff
         \ call mirror#Do(<q-args>, 'diff', g:mirror#diff_layout)

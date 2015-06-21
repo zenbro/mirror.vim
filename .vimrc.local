@@ -1,7 +1,0 @@
-filetype off
-set rtp+=dependencies/vader.vim
-set rtp+=dependencies/neossh.vim
-set rtp+=dependencies/unite.vim
-set rtp+=dependencies/vimfiler.vim
-filetype plugin indent on
-syntax enable
