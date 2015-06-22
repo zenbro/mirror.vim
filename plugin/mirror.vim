@@ -50,8 +50,6 @@ augroup projectWithMirrorDetect
   autocmd BufNewFile,BufReadPost * call DetectProjectWithMirror()
 augroup END
 
-" TODO
-" MirrorRun <env> - run shell command remotely
 command! MirrorConfig call mirror#EditConfig()
 command! MirrorDetect call DetectProjectWithMirror()
 

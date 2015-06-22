@@ -29,7 +29,7 @@ endif
 let g:autoloaded_mirror = 1
 
 let g:mirror#config_path = get(g:, 'mirror#config_path', $HOME . '/.mirrors')
-let g:mirror#open_with = get(g:, 'mirror#open_with', 'Nread')
+let g:mirror#open_with = get(g:, 'mirror#open_with', 'Explore')
 let g:mirror#diff_layout = get(g:, 'g:mirror#diff_layout', 'vsplit')
 let g:mirror#cache_dir = get(
       \ g:, 'mirror#cache_dir',
