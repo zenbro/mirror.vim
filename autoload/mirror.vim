@@ -205,9 +205,18 @@ function! s:PullFile(env)
   endif
 endfunction
 
+" Establish ssh connection with remote host
+function! s:SSHConnection(env)
+  let [_, remote_path] = s:FindPaths(a:env)
+  let [host, port, _] = s:ParseRemotePath(remote_path)
+  let address = empty(port) ? host : host . ':' . port
+  execute '!ssh' address
+endfunction
+
 " Open mirrors config in split
 function! mirror#EditConfig()
   execute ':botright split' g:mirror#config_path
+  setlocal filetype=yaml
 endfunction
 
 " Set default environment for current session or globally
@@ -238,7 +247,7 @@ function! s:ChooseEnv(env)
           \ '(' . g:mirror#config_path . ')'
   elseif empty(a:env) && empty(default_env)
     echo 'Can''t find default environment for'
-          \'"' . b:project_with_mirror . '"...'
+          \ '"' . b:project_with_mirror . '"...'
   " env is not given - using default env for current project
   elseif empty(a:env) && !empty(default_env)
     return default_env
@@ -289,6 +298,8 @@ function! mirror#Do(env, type, command)
       call s:PushFile(env)
     elseif a:type ==# 'pull'
       call s:PullFile(env)
+    elseif a:type ==# 'ssh'
+      call s:SSHConnection(env)
     endif
   endif
 endfunction
@@ -326,6 +337,9 @@ function! mirror#InitForBuffer(current_project)
         \ call mirror#Do(<q-args>, 'push', '')
   command! -buffer -complete=customlist,s:EnvCompletion -nargs=? MirrorPull
         \ call mirror#Do(<q-args>, 'pull', '')
+
+  command! -buffer -complete=customlist,s:EnvCompletion -nargs=? MirrorSSH
+        \ call mirror#Do(<q-args>, 'ssh', '')
 
   command! -buffer -bang -complete=customlist,s:EnvCompletion -nargs=?
         \ MirrorEnvironment call mirror#SetDefaultEnv(<q-args>, <bang>0)
