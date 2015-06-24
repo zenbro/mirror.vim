@@ -121,6 +121,12 @@ function! s:ScpCommand(port, src_path, dest_path)
   return printf('scp %s -q %s %s', port, a:src_path, a:dest_path)
 endfunction
 
+" Build ssh command from args
+function! s:SSHCommand(host, port)
+  let port = empty(a:port) ? '' : '-p ' . a:port
+  return printf('ssh %s %s', port, a:host)
+endfunction
+
 " Find port, local_file and remote_file for current environment
 function! s:PrepareToCopy(env)
   let [local_path, remote_path] = s:FindPaths(a:env)
@@ -208,8 +214,7 @@ endfunction
 function! s:SSHConnection(env)
   let [_, remote_path] = s:FindPaths(a:env)
   let [host, port, _] = s:ParseRemotePath(remote_path)
-  let address = empty(port) ? host : host . ':' . port
-  execute '!ssh' address
+  execute '!' . s:SSHCommand(host, port)
 endfunction
 
 " Get information about remote file by executing ls -lh
@@ -217,8 +222,7 @@ endfunction
 function! s:GetFileInfo(env)
   let [local_path, remote_path] = s:FindPaths(a:env)
   let [host, port, path] = s:ParseRemotePath(remote_path . local_path)
-  let address = empty(port) ? host : host . ':' . port
-  execute '!ssh' address 'ls -lh' path
+  execute '!' . s:SSHCommand(host, port) 'ls -lh' path
 endfunction
 
 " Open mirrors config in split
