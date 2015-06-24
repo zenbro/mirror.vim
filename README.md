@@ -74,18 +74,22 @@ project1:
   staging: project1@staging_host/current
   production: project1@production_host/current
 project2:
-  staging: project2@staging_host/path/to/project2
+  staging: project2@another_host:23//opt/project2
 ```
 
 This configuration use simplified [YAML](https://en.wikipedia.org/wiki/YAML) format.
 
 * *project1*, *project2* - names of working directories for each project (e.g. *~/work/project1*, *~/work/project2*)
 * *staging*, *production* - names of environments for each projects. You can use whatever name you want when adding environments.
-* *project1@staging_host/current* - remote path for your project. It should be available by doing these commands:
-
+* *project1@staging_host/current* - remote path for your project.  Path *current* is related to home directory of user *project1* on host *staging_host*. It should be available by doing these commands:
 ```
 ssh project1@staging_host
 cd current
+```
+* *project2@another_host:23//opt/project2* - path */opt/project2* is related to system root directory on host *another_host*. It should be available by doing these commands:
+```
+ssh -p 23 project2@staging_host
+cd /opt/project2
 ```
 
 If your currently working directory is in the config file (e.g. *~/work/project1*), then you should be able to do environment-specific remote actions.
