@@ -112,6 +112,7 @@ Available commands:
 * `:MirrorRoot` - open remote system root path in file explorer.
 * `:MirrorParentDir` - open remote parent directory of file you currently working with.
 * `:MirrorSSH` - establish ssh connection with host of current environment.
+* `:MirrorInfo` - get information about remote file you currently editing locally.
 
 
 ## Configuration

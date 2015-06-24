@@ -42,9 +42,8 @@ let g:mirror#global_default_environments = {}
 
 " Parse line like 'environment: remote_path'
 function! s:GetEnvironmentAndPath(line)
-  let [environment, remote_path] = split(a:line)
-  let environment = substitute(environment, ':$', '', '')
-  let remote_path = substitute(remote_path, '\s', '', 'g')
+  let m = matchlist(a:line, '\s*\(\S\+\):\s*\(.*\)\s*$')
+  let [environment, remote_path] = [m[1], m[2]]
   let remote_path = substitute(remote_path, '/$', '', '')
   return [environment, remote_path]
 endfunction
@@ -213,6 +212,15 @@ function! s:SSHConnection(env)
   execute '!ssh' address
 endfunction
 
+" Get information about remote file by executing ls -lh
+" -rw-rw-r-- 1 user user 7.2K Jun 23 20:51 path/to/file
+function! s:GetFileInfo(env)
+  let [local_path, remote_path] = s:FindPaths(a:env)
+  let [host, port, path] = s:ParseRemotePath(remote_path . local_path)
+  let address = empty(port) ? host : host . ':' . port
+  execute '!ssh' address 'ls -lh' path
+endfunction
+
 " Open mirrors config in split
 function! mirror#EditConfig()
   execute ':botright split' g:mirror#config_path
@@ -300,6 +308,8 @@ function! mirror#Do(env, type, command)
       call s:PullFile(env)
     elseif a:type ==# 'ssh'
       call s:SSHConnection(env)
+    elseif a:type ==# 'info'
+      call s:GetFileInfo(env)
     endif
   endif
 endfunction
@@ -340,6 +350,9 @@ function! mirror#InitForBuffer(current_project)
 
   command! -buffer -complete=customlist,s:EnvCompletion -nargs=? MirrorSSH
         \ call mirror#Do(<q-args>, 'ssh', '')
+
+  command! -buffer -complete=customlist,s:EnvCompletion -nargs=? MirrorInfo
+        \ call mirror#Do(<q-args>, 'info', '')
 
   command! -buffer -bang -complete=customlist,s:EnvCompletion -nargs=?
         \ MirrorEnvironment call mirror#SetDefaultEnv(<q-args>, <bang>0)
