@@ -1,0 +1,282 @@
+*mirror.txt* A plugin that simplified editing of remote files.
+
+                  _                                     _~
+        ___ __ _ (_) __ _  __ _   ___   __ _    __   __(_)  ___ __ _~
+       / _ ' _` || ||__` ||__` | / _ \ |__` |   \ \ / /| | / _ ' _` |~
+      | | | | | || |   | |   | || (_) |   | | _  \ V / | || | | | | |~
+      |_| |_| |_||_|   |_|   |_| \___/    |_|(_)  \_/  |_||_| |_| |_|~
+
+
+==============================================================================
+CONTENTS                                                     *mirror-contents*
+
+    1. Introduction...............................|mirror-introduction|
+    2. Usage......................................|mirror-usage|
+    3. Configuration..............................|mirror-configuration|
+    4. Commands...................................|mirror-commands|
+       4.1. Global................................|mirror-commands-global|
+       4.2. Local.................................|mirror-commands-local|
+            4.2.1. Project discovery..............|mirror-project-discovery|
+            4.2.2. Default environment............|mirror-default-environment|
+            4.2.3. Remote actions.................|mirror-remote-actions|
+    5. Variables..................................|mirror-variables|
+    6. FAQ........................................|mirror-faq|
+    7. About......................................|mirror-about|
+    8. License....................................|mirror-license|
+    9. Changelog..................................|mirror-changelog|
+
+==============================================================================
+1. Introduction                                 *mirror-introduction* *mirror*
+
+If some of your projects have multiple environments (e.g. development,
+staging, production - with nearly the same directory and files structure),
+then there is a situations when you need to connect to one of this
+environments via ssh and remotely edit project-related files. Usually you will
+do something like this:
+>
+ ssh user@host
+ cd path/to/you/project
+ vim /some/file
+ and so on...
+<
+
+This plugin was created to simplify this process by maintaining special
+configuration file (|mirror-configuration|) and adding different commands for
+quickly doing remote actions (|mirror-commands-local|) for each environment of
+project you working with. This remote actions use |netrw| under the hood. You
+don't need to install |netrw| - it's part of vim distribution and it used as
+default file explorer (e.g. :edit .).
+
+==============================================================================
+2. Usage                                                        *mirror-usage*
+
+Let's assume that you have a project `/home/user/work/my_project`.
+This project have multiple environments - development, staging and production.
+Development - is your current local environment. Staging and production -
+remote environments, each placed on their own remote server.
+Project structure on each environments is nearly similar (from here comes the
+name of this plugin). If you want to get access to multiple remote
+environment-related actions, you need to add information about this project to
+configuration file. Run this command |:MirrorConfig|.
+
+For our example it should look like this:
+>
+    /home/user/work/my_project:
+      staging: my_project@staging_host/current
+      production: my_project@production_host/current
+<
+See |mirror-configuration| for more details about format and structure of
+this file.
+
+From now, if you open any file inside `/home/user/work/my_project` directory
+then multiple remote commands should be available.
+For example, if you want to edit some file on remote server in staging
+environment (`my_project@staging_host`), then open this file locally and run
+|:MirrorEdit| staging
+You should be able to edit this remote file here, locally, with your own vim
+settings.
+If you want to see difference between file, you currently edit and version of
+this file on production server - use this command:
+|:MirrorDiff| production
+
+There are many other remote actions available, see |mirror-remote-actions| for
+more details.
+
+==============================================================================
+3. Configuration                                        *mirror-configuration*
+
+Default path of configuration file is `~/.mirrors`.
+Use |g:mirror#config_path| if you want to change location of configuration
+file. To open configuration file use |:MirrorConfig| command.
+
+Configuration file use simplified YAML format and doesn't support things like
+&links, arrays, inline objects.
+
+Example of mirrors config:                             *mirror-config-example*
+>
+    /home/user/work/project1:
+      staging: project1@staging_host/current
+      production: project1@production_host/current
+    /home/user/work/project2:
+      staging: project2@another_host:23//opt/project2
+<
+
+`/home/user/work/project1`, `/home/user/work/project2` - names of working
+directories for each project. See also |mirror-project-discovery|.
+
+`staging`, `production` - names of environments for each projects. You can use
+whatever name you want when adding environments.
+
+`project1@staging_host/current` - remote path for environment "staging" of
+project "project1". Path "current" is related to home directory of user
+"project1" on host "staging_host".
+It should be available by doing these commands:
+>
+  ssh project1@staging_host
+  cd current
+<
+
+`project2@another_host:23//opt/project2` - remote path for environment
+"staging" of project "project2". Path "/opt/project2" is related to system
+root directory on host "another_host".
+It should be available by doing these commands:
+>
+  ssh -p 23 project2@another_host
+  cd /opt/project2
+<
+
+If you open any file inside your projects directories, then you should be able
+to do environment-specific remote actions.
+
+==============================================================================
+4. Commands                                                  *mirror-commands*
+
+------------------------------------------------------------------------------
+4.1 Global                                            *mirror-commands-global*
+
+This command is available everywhere.
+
+:MirrorConfig                                                  *:MirrorConfig*
+          Open configuration file in split. Configuration file path can be
+          changed by |g:mirror#config_path|.
+
+------------------------------------------------------------------------------
+4.2 Local                                              *mirror-commands-local*
+
+Local commands are only available when you open a file inside one of the
+projects from configuration.
+
+
+4.2.1 Project discovery                             *mirror-project-discovery*
+
+When you open a file and absolute path of this file containing one of the path
+from configuration then project discovery succeeded and local commands will be
+available for current buffer.
+
+In summary, project discovery will be done after following actions:
+  |BufNewFile|
+  |BufReadPost|
+  |BufWritePost| |g:mirror#config_path| (saving configuration file)
+
+
+4.2.2 Default environment                         *mirror-default-environment*
+
+When your project have only one environment, then it will be used
+automatically for all local commands as default - you don't need to pass it as
+argument. When your project have multiply environments - you need to pass it
+explicitly.
+
+To change default environment for current project use one of the following
+commands.
+
+:MirrorEnvironment                                   *:MirrorEnvironment-info*
+          Show default environment for current project.
+
+:MirrorEnvironment {environment}                          *:MirrorEnvironment*
+          Set default {environment} for current session.
+
+:MirrorEnvironment! {environment}                        *:MirrorEnvironment!*
+          Set default {environment} globally. Path, where default environments
+          is saved can be changed by |g:mirror#cache_dir|.
+
+
+4.2.3 Remote actions                                   *mirror-remote-actions*
+
+Local file - file you are currently editing.
+Remote file - version of local file on remote server.
+
+:MirrorEdit {environment}                                        *:MirrorEdit*
+          Open remote version of a local file.
+
+:MirrorSEdit {environment}                                      *:MirrorSEdit*
+          Open remote version of a local file in horizontal split.
+
+:MirrorVEdit {environment}                                      *:MirrorVEdit*
+          Open remote version of a local file in vertical split.
+
+:MirrorDiff {environment}                                        *:MirrorDiff*
+          Open vertical split with difference between remote and local file.
+          Use |diffoff| to exit diff mode.  Use |g:mirror#diff_layout| to
+          change default split layout for this command.
+
+:MirrorSDiff {environment}                                      *:MirrorSDiff*
+          Open horizontal split with difference between remote and local file.
+
+:MirrorVDiff {environment}                                      *:MirrorVDiff*
+          Open vertical split with difference between remote and local file.
+
+:MirrorPush {environment}                                        *:MirrorPush*
+          Overwrite remote file file by local file.
+
+:MirrorPull {environment}                                        *:MirrorPull*
+          Overwrite local file file by remote file.
+
+:MirrorOpen {environment}                                        *:MirrorOpen*
+          Open remote project directory in file explorer (|netrw|).
+
+:MirrorRoot {environment}                                        *:MirrorRoot*
+          Open remote system root directory in file explorer.
+
+:MirrorParentDir {environment}                              *:MirrorParentDir*
+          Open remote parent directory of local file.
+
+:MirrorSSH {environment}                                          *:MirrorSSH*
+          Establish ssh connection with selected {environment}.
+
+:MirrorInfo {environment}                                        *:MirrorInfo*
+          Get information about remote file.
+
+
+==============================================================================
+5. Variables                                                *mirror-variables*
+
+*g:mirror#config_path*
+          Location of configuration file.
+          Default value is `'~/.mirrors'`
+
+*g:mirror#open_with*
+          File explorer command that used in |:MirrorOpen|, |:MirrorRoot| and
+          |:MirrorParentDir|.
+          If you want to open file explorer in horizontal split - you can use
+          `'Sexplore'`. See also |netrw-explore|.
+          Default value is `'Explore'`
+
+*g:mirror#diff_layout*
+          Split layout for |:MirrorDiff| command.
+          Default value is `'vsplit'`
+
+*g:mirror#cache_dir*
+          Directory where cache is stored. Currently used for saving default
+          environments, that set via |:MirrorEnvironment!| {environment}.
+          Default value is `'~/.cache/mirror.vim'`
+
+==============================================================================
+6. FAQ                                                            *mirror-faq*
+
+Q. Why should I always enter password when executing one of the remote
+actions?
+
+A. Use SSH config or passwordless authentication with SSH-keys.
+You can get more information here:
+http://nerderati.com/2011/03/17/simplify-your-life-with-an-ssh-config-file/
+https://wiki.archlinux.org/index.php/SSH_keys
+
+==============================================================================
+7. About                                                        *mirror-about*
+
+The latest development version can be retrieved from GitHub:
+    https://github.com/zenbro/mirror.vim
+
+==============================================================================
+8. License                                                    *mirror-license*
+
+mirror.vim is released under the MIT License.
+See http://opensource.org/licenses/MIT
+
+==============================================================================
+9. Changelog                                                *mirror-changelog*
+
+v1.0.0      24 Jun 2015
+    * Initial stable release.
+
+vim:tw=78:ts=8:ft=help:norl:
