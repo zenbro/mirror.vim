@@ -267,6 +267,9 @@ https://wiki.archlinux.org/index.php/SSH_keys
 ==============================================================================
 7. About                                                        *mirror-about*
 
+The latest stable version can be found here:
+    http://www.vim.org/scripts/script.php?script_id=5204
+
 The latest development version can be retrieved from GitHub:
     https://github.com/zenbro/mirror.vim
 
