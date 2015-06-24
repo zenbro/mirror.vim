@@ -23,37 +23,19 @@
 " }}}
 "=============================================================================
 
-function! DetectProjectWithMirror()
-  let cwd = getcwd()
-  " sorting projects path by its lengths in desc order
-  " it helps to avoid discovery of wrong projects in following situation:
-  " current working directory: /home/user/work/project
-  " configuration include two projects:
-  " /home/user/work         <= without sorting, this project will be used
-  " /home/user/work/project
-  let projects = reverse(sort(keys(g:mirror#config)))
-  for project in projects
-    let m = matchlist(cwd, '\(' . project . '\)')
-    if !empty(m)
-      call mirror#InitForBuffer(project)
-      return 1
-    endif
-  endfor
-endfunction
-
 augroup updateMirrorConfigAndCache
   autocmd!
   autocmd VimEnter * call mirror#ReadConfig() |
         \ call mirror#ReadCache() |
-        \ call DetectProjectWithMirror()
+        \ call mirror#ProjectDiscovery()
   execute 'autocmd BufWritePost' g:mirror#config_path
     \ 'call mirror#ReadConfig() | '
-    \ 'call DetectProjectWithMirror()'
+    \ 'call mirror#ProjectDiscovery()'
 augroup END
 
 augroup projectWithMirrorDetect
   autocmd!
-  autocmd BufNewFile,BufReadPost * call DetectProjectWithMirror()
+  autocmd BufNewFile,BufReadPost * call mirror#ProjectDiscovery()
 augroup END
 
 command! MirrorConfig call mirror#EditConfig()

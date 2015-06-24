@@ -371,4 +371,24 @@ function! mirror#InitForBuffer(current_project)
         \ MirrorEnvironment call mirror#SetDefaultEnv(<q-args>, <bang>0)
 endfunction
 
+function! mirror#ProjectDiscovery()
+  let cwd = getcwd()
+  " sorting projects path by its lengths in desc order
+  " it helps to avoid discovery of wrong projects in following situation:
+  " current working directory: /home/user/work/project
+  " configuration include two projects:
+  " /home/user/work         <= without sorting, this project will be used
+  " /home/user/work/project
+  let projects = reverse(sort(keys(g:mirror#config)))
+  for project in projects
+    let m = matchlist(cwd, '\(' . project . '\)')
+    if !empty(m)
+      echo 'Project discovered!' project
+      call mirror#InitForBuffer(project)
+      return 1
+    endif
+  endfor
+endfunction
+
+
 " vim: foldmethod=marker
