@@ -151,7 +151,6 @@ function! s:FindPaths(env)
   if match(remote_path, '/$') < 0
     let remote_path .= '/'
   endif
-  echo [local_path, remote_path]
   return [local_path, remote_path]
 endfunction
 
@@ -383,7 +382,6 @@ function! mirror#ProjectDiscovery()
   for project in projects
     let m = matchlist(cwd, '\(' . project . '\)')
     if !empty(m)
-      echo 'Project discovered!' project
       call mirror#InitForBuffer(project)
       return 1
     endif
