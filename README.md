@@ -70,16 +70,16 @@ First, you need to add information about your project to *mirrors* config. Open 
 Example of *mirrors* config:
 
 ```yaml
-project1:
+/home/user/work/project1:
   staging: project1@staging_host/current
   production: project1@production_host/current
-project2:
+/home/user/work/project2:
   staging: project2@another_host:23//opt/project2
 ```
 
 This configuration use simplified [YAML](https://en.wikipedia.org/wiki/YAML) format.
 
-* *project1*, *project2* - names of working directories for each project (e.g. *~/work/project1*, *~/work/project2*)
+* */home/user/work/project1*, */home/user/work/project2* - working directories for each projects.
 * *staging*, *production* - names of environments for each projects. You can use whatever name you want when adding environments.
 * *project1@staging_host/current* - remote path for your project.  Path *current* is related to home directory of user *project1* on host *staging_host*. It should be available by doing these commands:
 ```
@@ -92,7 +92,7 @@ ssh -p 23 project2@staging_host
 cd /opt/project2
 ```
 
-If your currently working directory is in the config file (e.g. *~/work/project1*), then you should be able to do environment-specific remote actions.
+If your open any file from projects that you recently added to configuration, then you should be able to do environment-specific remote actions.
 
 All these actions have following syntax: `:CommandName <environment>` (e.g. `:MirrorEdit staging`). When your project have only one environment, then it will be used automatically for all commands as default - you don't need to pass it. When your project have multiply environments - you need to pass it explicitly.
 
@@ -140,10 +140,6 @@ let g:mirror#cache_dir = '~/.cache/mirror.vim'
 **Q. Why should I always enter password when executing one of the remote actions?**
 
 A. Use [SSH config](http://nerderati.com/2011/03/17/simplify-your-life-with-an-ssh-config-file/) or passwordless authentication with [SSH-keys](https://wiki.archlinux.org/index.php/SSH_keys).
-
-**Q. I change directory to my project root in Vim (`:cd ~/work/project`), but`Mirror*` commands still unavailable. How can I fix that?**
-
-A. This plugin will try to find project root when you opening some file. When you manually change current working directory by `:cd`, then use `:MirrorDetect`. This command will try to find you current directory in *mirrors* config.
 
 ## License
 

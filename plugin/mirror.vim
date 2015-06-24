@@ -57,7 +57,6 @@ augroup projectWithMirrorDetect
 augroup END
 
 command! MirrorConfig call mirror#EditConfig()
-command! MirrorDetect call DetectProjectWithMirror()
 
 nnoremap <silent> <Plug>(mirror_close_remote_buffer)
       \ :call mirror#CloseRemoteBuffer()<CR>
