@@ -12,7 +12,7 @@
 
 ## Live demo
 
-Coming soon!
+[![asciicast](https://asciinema.org/a/22407.png)](https://asciinema.org/a/22407)
 
 ## Introduction
 

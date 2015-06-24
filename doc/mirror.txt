@@ -47,6 +47,9 @@ project you working with. This remote actions use |netrw| under the hood. You
 don't need to install |netrw| - it's part of vim distribution and it used as
 default file explorer (e.g. :edit .).
 
+Live demo:
+https://asciinema.org/a/22407
+
 ==============================================================================
 2. Usage                                                        *mirror-usage*
 
