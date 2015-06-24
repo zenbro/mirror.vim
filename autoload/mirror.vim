@@ -124,7 +124,7 @@ endfunction
 " Build ssh command from args
 function! s:SSHCommand(host, port)
   let port = empty(a:port) ? '' : '-p ' . a:port
-  return printf('ssh %s %s', port, a:host)
+  return printf('ssh -q %s %s', port, a:host)
 endfunction
 
 " Find port, local_file and remote_file for current environment
