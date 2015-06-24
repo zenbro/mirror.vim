@@ -132,17 +132,26 @@ function! s:PrepareToCopy(env)
   let [local_path, remote_path] = s:FindPaths(a:env)
   let [host, port, path] = s:ParseRemotePath(remote_path . local_path)
   let remote_file = printf('%s:%s', host, path)
-  let local_file = fnamemodify(local_path, ':p')
+  let local_file = expand('%:p')
   return [port, local_file, remote_file]
 endfunction
 
 " Find local path of current file and remote path for current project
 function! s:FindPaths(env)
-  let local_path = expand(@%)
+  " example:
+  " b:project_with_mirror: /home/user/work/project
+  " local_path: /home/user/work/project/config/database.yml
+  "           m[1]                   m[2]
+  " (/home/user/work/project)(/config/database.yml)
+  let local_path = expand('%:p')
+  let m = matchlist(local_path, '\(' . b:project_with_mirror . '\)\(.*\)')
+  let local_path = substitute(m[2], '^/', '', '')
+
   let remote_path = s:PrependProtocol(get(s:CurrentMirrors(), a:env))
   if match(remote_path, '/$') < 0
     let remote_path .= '/'
   endif
+  echo [local_path, remote_path]
   return [local_path, remote_path]
 endfunction
 
