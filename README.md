@@ -30,7 +30,7 @@ This plugin was created to simplify this process by maintaining special configur
 
 ## Requirements
 
-* Vim with [netrw](https://github.com/eiginn/netrw) support (any version greater than 7.0).
+* Vim with [netrw](http://www.vim.org/scripts/script.php?script_id=1075) support (any version greater than 7.0).
 * Unix-based system with [scp](https://en.wikipedia.org/wiki/Secure_copy) and ssh client installed.
 
 ## Installation
@@ -40,7 +40,7 @@ Use your favourite plugin manager: [Pathogen](https://github.com/tpope/vim-patho
 Add this lines to *.vimrc* (probably they already there):
 
 ```vim
-set nocompatible    " disable backward copmatability with Vi
+set nocompatible    " disable backward compatibility with Vi
 filetype plugin on  " plugins are enabled
 ```
 
