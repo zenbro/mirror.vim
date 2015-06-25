@@ -1,4 +1,4 @@
-# mirror.vim [![GitHub release](https://img.shields.io/github/release/zenbro/mirror.vim.svg)](https://github.com/zenbro/mirror.vim) [![GitHub issues](https://img.shields.io/github/issues/zenbro/mirror.vim.svg)](https://github.com/zenbro/mirror.vim) [![GitHub license](https://img.shields.io/github/license/zenbro/mirror.vim.svg)](https://github.com/zenbro/mirror.vim)
+# mirror.vim [![GitHub release](https://img.shields.io/github/release/zenbro/mirror.vim.svg)](https://github.com/zenbro/mirror.vim/releases) [![GitHub issues](https://img.shields.io/github/issues/zenbro/mirror.vim.svg)](https://github.com/zenbro/mirror.vim/issues)
 
 * [Live demo](#live-demo)
 * [Introduction](#introduction)
