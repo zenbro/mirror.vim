@@ -371,7 +371,7 @@ function! mirror#InitForBuffer(current_project)
 endfunction
 
 function! mirror#ProjectDiscovery()
-  let cwd = getcwd()
+  let file_path = expand('%:p')
   " sorting projects path by its lengths in desc order
   " it helps to avoid discovery of wrong projects in following situation:
   " current working directory: /home/user/work/project
@@ -380,8 +380,7 @@ function! mirror#ProjectDiscovery()
   " /home/user/work/project
   let projects = reverse(sort(keys(g:mirror#config)))
   for project in projects
-    let m = matchlist(cwd, '\(' . project . '\)')
-    if !empty(m)
+    if match(file_path, project) != -1
       call mirror#InitForBuffer(project)
       return 1
     endif
