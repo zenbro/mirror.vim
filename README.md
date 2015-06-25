@@ -2,6 +2,7 @@
 
 * [Live demo](#live-demo)
 * [Introduction](#introduction)
+* [Requirements](#requirements)
 * [Installation](#installation)
 * [Usage](#usage)
 * [Configuration](#configuration)
@@ -25,59 +26,24 @@ vim /some/file
 and so on...
 ```
 
-This plugin was created to simplify this process by maintaining special configuration file and adding different commands for quickly doing remote actions for each environment of project you working with. This remote actions use [netrw](http://www.vim.org/scripts/script.php?script_id=1075) under the hood. You don't need to install netrw - it's part of vim distribution and it used as default file explorer (e.g. `:edit .`).
+This plugin was created to simplify this process by maintaining special configuration file and adding different commands for quickly doing remote actions for each environment of project you working with. This remote actions use [netrw](http://www.vim.org/scripts/script.php?script_id=1075) under the hood. You don't need to install netrw - it's part of vim distribution and it used as default file explorer (e.g. `:edit .`). To get more information about editing remote files with netrw - refer to `:h netrw-start`.
+
+## Requirements
+
+* Vim with [netrw](https://github.com/eiginn/netrw) support (any version greater than 7.0).
+* Unix-based system with [scp](https://en.wikipedia.org/wiki/Secure_copy) and ssh client installed.
 
 ## Installation
 
-Use your favourite plugin manager.
+Use your favourite plugin manager: [Pathogen](https://github.com/tpope/vim-pathogen), [Vundle](https://github.com/gmarik/Vundle.vim), [NeoBundle](https://github.com/Shougo/neobundle.vim) or [VimPlug](https://github.com/junegunn/vim-plug). Add `zenbro/mirror.vim` to the list of plugins, source that and issue your manager's install command.
 
-### Pathogen
+Add this lines to *.vimrc* (probably they already there):
 
-Run the following in a terminal:
-
-```bash
-cd ~/.vim/bundle
-git clone https://github.com/zenbro/mirror.vim
+```vim
+set nocompatible    " disable backward copmatability with Vi
+filetype plugin on  " plugins are enabled
 ```
 
-### Vundle
-
-Place this in your *.vimrc*:
-
-`Plugin 'zenbro/mirror.vim'`
-
-then run the following in Vim:
-
-```
-:source %
-:PluginInstall
-```
-
-### VimPlug
-
-Place this in your *.vimrc*:
-
-`Plug 'zenbro/mirror.vim'`
-
-then run the following in Vim:
-
-```
-:source %
-:PlugInstall
-```
-
-### NeoBundle
-
-Place this in your *.vimrc*:
-
-`NeoBundle 'zenbro/mirror.vim'`
-
-then run the following in Vim:
-
-```
-:source %
-:NeoBundleInstall
-```
 
 ## Usage
 
