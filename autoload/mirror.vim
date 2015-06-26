@@ -30,11 +30,12 @@ let g:autoloaded_mirror = 1
 
 let g:mirror#config_path = get(g:, 'mirror#config_path', $HOME . '/.mirrors')
 let g:mirror#open_with = get(g:, 'mirror#open_with', 'Explore')
-let g:mirror#diff_layout = get(g:, 'g:mirror#diff_layout', 'vsplit')
+let g:mirror#diff_layout = get(g:, 'mirror#diff_layout', 'vsplit')
 let g:mirror#cache_dir = get(
       \ g:, 'mirror#cache_dir',
       \ $HOME . '/.cache/mirror.vim'
       \ )
+let g:netrw_silent = get(g:, 'netrw_silent', 1)
 
 let g:mirror#config = {}
 let g:mirror#local_default_environments = {}

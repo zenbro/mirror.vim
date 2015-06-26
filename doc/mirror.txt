@@ -45,7 +45,7 @@ quickly doing remote actions (|mirror-commands-local|) for each environment of
 project you working with. This remote actions use |netrw| under the hood. You
 don't need to install |netrw| - it's part of vim distribution and it used as
 default file explorer (e.g. :edit .). To get more information about editing
-remote files with netrw - refer to |netrw-start|.
+remote files with |netrw| - refer to |netrw-start|.
 
 Live demo:
 https://asciinema.org/a/22407
@@ -250,6 +250,14 @@ Remote file - version of local file on remote server.
           environments, that set via |:MirrorEnvironment!| {environment}.
           Default value is `'~/.cache/mirror.vim'`
 
+|g:netrw_silent|
+          This variable is related to |netrw| configuration.
+          Possible values:
+          0 - transfers done normally (you should see what's going on under
+          the hood when using |MirrorEdit| or |MirrorDiff|)
+          1 - transfers done silently
+          Silent mode will be used by default.
+
 ==============================================================================
 6. FAQ                                                            *mirror-faq*
 
@@ -279,7 +287,9 @@ See http://opensource.org/licenses/MIT
 ==============================================================================
 9. Changelog                                                *mirror-changelog*
 
-v1.0.0      24 Jun 2015
+v1.0.1      2015-06-25
+    * Fix project discovery algorithm
+v1.0.0      2015-06-24
     * Initial stable release.
 
 vim:tw=78:ts=8:ft=help:norl:

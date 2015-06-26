@@ -171,12 +171,18 @@ let g:mirror#config_path = '~/.mirrors'
 let g:mirror#open_with = 'Explore'
 let g:mirror#diff_layout = 'vsplit'
 let g:mirror#cache_dir = '~/.cache/mirror.vim'
+let g:netrw_silent = 1
 ```
 
 * `g:mirror#config_path` - location of configuration file.
 * `g:mirror#open_with` - file explorer command that used in `:MirrorOpen`, `:MirrorRoot`, `:MirrorParentDir`. If you want to open file explorer in horizontal split - you can use `'Sexplore'`. See also `:h netrw-explore`.
 * `g:mirror#diff_layout` - split layout for `:MirrorDiff` command.
 * `g:mirror#cache_dir` - directory where cache is stored. Currently used for saving default environments, that set via `:MirrorEnvironment! <environment>`.
+* `g:netrw_silent` - this variable is related to netrw configuration.
+Possible values:
+  * 0 - transfers done normally (you should see what's going on under the hood when using `MirrorEdit` or `MirrorDiff`)
+  * 1 - transfers done silently
+Silent mode will be used by default.
 
 ## FAQ
 
