@@ -17,7 +17,10 @@
 
 ## Introduction
 
-If some of your projects have multiple environments (e.g. development, staging, production - with nearly the same directory and files structure), then there is a situations when you need to connect to one of this environments via ssh and remotely edit project-related files. Usually you will do something like this:
+If some of your projects have multiple environments (e.g. development, staging,
+production - with nearly the same directory and files structure), then there is
+a situations when you need to connect to one of this environments via ssh and
+remotely edit project-related files. Usually you will do something like this:
 
 ```bash
 ssh user@host
@@ -26,7 +29,13 @@ vim /some/file
 and so on...
 ```
 
-This plugin was created to simplify this process by maintaining special configuration file and adding different commands for quickly doing remote actions for each environment of project you working with. This remote actions use [netrw](http://www.vim.org/scripts/script.php?script_id=1075) under the hood. You don't need to install netrw - it's part of vim distribution and it used as default file explorer (e.g. `:edit .`). To get more information about editing remote files with netrw - refer to `:h netrw-start`.
+This plugin was created to simplify this process by maintaining special
+configuration file and adding different commands for quickly doing remote
+actions for each environment of project you working with. This remote actions
+use [netrw](http://www.vim.org/scripts/script.php?script_id=1075) under the
+hood. You don't need to install netrw - it's part of vim distribution and it
+used as default file explorer (e.g. `:edit .`). To get more information about
+editing remote files with netrw - refer to `:h netrw-start`.
 
 ## Requirements
 
@@ -48,7 +57,12 @@ filetype plugin on  " plugins are enabled
 ## Usage
 
 Let's assume that you have a project */home/user/work/my_project*.
-This project have multiple environments - development, staging and production. Development - is your current local environment. Staging and production - remote environments, each placed on their own remote server. Project structure on each environments is nearly similar (from here comes the name of this plugin). If you want to get access to multiple remote environment-related actions, you need to add information about this project to configuration file.
+This project have multiple environments - development, staging and production.
+Development - is your current local environment. Staging and production -
+remote environments, each placed on their own remote server. Project structure
+on each environments is nearly similar (from here comes the name of this
+plugin). If you want to get access to multiple environment-related remote
+actions, you need to add information about this project to configuration file.
 Run this command `:MirrorConfig` and edit configuration file.
 
 For our example it should look like this:
@@ -60,21 +74,28 @@ For our example it should look like this:
 ```
 See [Configuration](#configuration) for more details about format and structure of this file.
 
-From now, if you open any file inside */home/user/work/my_project* then multiple remote commands should be available.
+From now, if you open any file inside */home/user/work/my_project* then
+multiple remote commands should be available.
 For example, if you want to edit some file on remote server in staging
-environment (*my_project@staging_host*), then open this file locally and run `:MirrorEdit staging`. You should be able to edit this remote file here, locally, with your own vim settings.
-If you want to see difference between file, you currently edit and version of this file on production server - use this command: `:MirrorDiff production`
+environment (*my_project@staging_host*), then open this file locally and run
+`:MirrorEdit staging`. You should be able to edit this remote file here,
+locally, with your own vim settings. If you want to see difference between
+file, you currently edit and version of this file on production server - use
+this command: `:MirrorDiff production`.
 
 There are many other [remote actions](#remote-actions) available.
 
 ## Configuration
 
 Default path of configuration file is *~/.mirrors*.
-Use `g:mirror#config_path` if you want to change location of configuration file. To open configuration file use `:MirrorConfig` command. Use `q` to close it.
+Use `g:mirror#config_path` if you want to change location of configuration
+file. To open configuration file use `:MirrorConfig` command. Use `q` to close it.
 
-Configuration file use simplified [YAML](https://en.wikipedia.org/wiki/YAML) format and doesn't support things like &links, arrays, inline objects.
+Configuration file use simplified [YAML](https://en.wikipedia.org/wiki/YAML)
+format and doesn't support things like &links, arrays, inline objects.
 
 Example of mirrors config:
+
 ```yaml
 /home/user/work/project1:
   staging: project1@staging_host/current
@@ -85,11 +106,10 @@ Example of mirrors config:
 
 * */home/user/work/project1*, */home/user/work/project2* - names of working directories for each project. See also [Project discovery](#project-discovery).
 * *staging*, *production* - names of environments for each projects. You can use whatever name you want when adding environments.
-
 * *project1@staging_host/current* - remote path for environment "*staging*" of project "*project1*". Path "*current*" is related to home directory of user "*project1*" on host "*staging_host*".
 It should be available by doing these commands:
 
-```
+```bash
 ssh project1@staging_host
 cd current
 ```
@@ -102,8 +122,8 @@ ssh -p 23 project2@another_host
 cd /opt/project2
 ```
 
-If you open any file inside your projects directories, then you should be able to do environment-specific remote actions.
-
+If you open any file inside your projects directories, then you should be able
+to do environment-specific remote actions.
 
 ## Commands
 
@@ -116,11 +136,14 @@ This command is available everywhere.
 
 ### Local
 
-Local commands are only available when you open a file inside one of the projects from configuration.
+Local commands are only available when you open a file inside one of the
+projects from configuration.
 
 #### Project discovery
 
-When you open a file and absolute path of this file containing one of the path from configuration then project discovery succeeded and local commands will be available for current buffer.
+When you open a file and absolute path of this file containing one of the path
+from configuration then project discovery succeeded and local commands will be
+available for current buffer.
 
 In summary, project discovery will be done after following actions:
 
@@ -130,18 +153,20 @@ In summary, project discovery will be done after following actions:
 
 #### Default environment
 
-When your project have only one environment, then it will be used automatically for all local commands as default - you don't need to pass it as argument. When your project have multiply environments - you need to pass it explicitly.
+When your project have only one environment, then it will be used automatically
+for all local commands as default - you don't need to pass it as argument. When
+  your project have multiply environments - you need to pass it explicitly.
 
 To change default environment for current project use one of the following commands.
 
  * `:MirrorEnvironment` - show default environment for current project.
- * `:MirrorEnvironment environment>` - set default `<environment>` for current session.
+ * `:MirrorEnvironment <environment>` - set default `<environment>` for current session.
  * `:MirrorEnvironment! <environment>` - set default `<environment>` globally.  
  Path, where default environments is saved can be changed by `g:mirror#cache_dir`.
 
 #### Remote actions
 
-Local file - file you are currently editing.
+Local file - file you are currently editing.  
 Remote file - version of local file on remote server.
 
 * `:MirrorEdit <environment>` - open remote version of a local file.
@@ -150,8 +175,8 @@ Remote file - version of local file on remote server.
 * `:MirrorDiff <environment>` - open vertical split with difference between remote and local file. Use `:diffoff` to exit diff mode.  Use `g:mirror#diff_layout` to change default split layout for this command.
   * `:MirrorSDiff <environment>` - open horizontal split with difference between remote and local file.
   * `:MirrorVEdit <environment>` - open vertical split with difference between remote and local file.
-* `:MirrorPush <environment>` - overwrite remote file file by local file.
-* `:MirrorPull <environment>` - overwrite local file file by remote file.
+* `:MirrorPush <environment>` - overwrite remote file by local file.
+* `:MirrorPull <environment>` - overwrite local file by remote file.
 * `:MirrorOpen <environment>` - open remote project directory in file explorer (netrw).
 * `:MirrorRoot <environment>` - open remote system root directory in file explorer.
 * `:MirrorParentDir <environment>` - open remote parent directory of local file.
@@ -177,7 +202,7 @@ let g:netrw_silent = 1
 * `g:mirror#cache_dir` - directory where cache is stored. Currently used for saving default environments, that set via `:MirrorEnvironment! <environment>`.
 * `g:netrw_silent` - this variable is related to netrw configuration.  
 Possible values:
-  * 0 - transfers done normally (you should see what's going on under the hood when using `MirrorEdit` or `MirrorDiff`)
+  * 0 - transfers done normally (you should see what's going on under the hood when using `:MirrorEdit` or `:MirrorDiff` commands)
   * 1 - transfers done silently  
 Silent mode will be used by default.
 
@@ -185,7 +210,8 @@ Silent mode will be used by default.
 
 **Q. Why should I always enter password when executing one of the remote actions?**
 
-A. Use [SSH config](http://nerderati.com/2011/03/17/simplify-your-life-with-an-ssh-config-file/) or passwordless authentication with [SSH-keys](https://wiki.archlinux.org/index.php/SSH_keys).
+A. Use [SSH config](http://nerderati.com/2011/03/17/simplify-your-life-with-an-ssh-config-file/)
+or passwordless authentication with [SSH-keys](https://wiki.archlinux.org/index.php/SSH_keys).
 
 ## License
 

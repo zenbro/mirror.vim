@@ -206,10 +206,10 @@ Remote file - version of local file on remote server.
           Open vertical split with difference between remote and local file.
 
 :MirrorPush {environment}                                        *:MirrorPush*
-          Overwrite remote file file by local file.
+          Overwrite remote file by local file.
 
 :MirrorPull {environment}                                        *:MirrorPull*
-          Overwrite local file file by remote file.
+          Overwrite local file by remote file.
 
 :MirrorOpen {environment}                                        *:MirrorOpen*
           Open remote project directory in file explorer (|netrw|).
@@ -254,7 +254,7 @@ Remote file - version of local file on remote server.
           This variable is related to |netrw| configuration.
           Possible values:
           0 - transfers done normally (you should see what's going on under
-          the hood when using |MirrorEdit| or |MirrorDiff|)
+          the hood when using |:MirrorEdit| or |:MirrorDiff|)
           1 - transfers done silently
           Silent mode will be used by default.
 
