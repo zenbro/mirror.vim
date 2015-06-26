@@ -54,11 +54,9 @@ Run this command `:MirrorConfig` and edit configuration file.
 For our example it should look like this:
 
 ```yaml
-/home/user/work/project1:
-  staging: project1@staging_host/current
-  production: project1@production_host/current
-/home/user/work/project2:
-  staging: project2@another_host:23//opt/project2
+/home/user/work/my_project:
+  staging: my_project@staging_host/current
+  production: my_project@production_host/current
 ```
 See [Configuration](#configuration) for more details about format and structure of this file.
 
@@ -152,8 +150,7 @@ Remote file - version of local file on remote server.
 * `:MirrorEdit <environment>` - open remote version of a local file.
   * `:MirrorSEdit <environment>` - open remote version of a local file in horizontal split.
   * `:MirrorVEdit <environment>` - open remote version of a local file in vertical split.
-* `:MirrorDiff <environment>` - open vertical split with difference between remote and local file.  
-Use `:diffoff` to exit diff mode.  Use `g:mirror#diff_layout` to change default split layout for this command.
+* `:MirrorDiff <environment>` - open vertical split with difference between remote and local file. Use `:diffoff` to exit diff mode.  Use `g:mirror#diff_layout` to change default split layout for this command.
   * `:MirrorSDiff <environment>` - open horizontal split with difference between remote and local file.
   * `:MirrorVEdit <environment>` - open vertical split with difference between remote and local file.
 * `:MirrorPush <environment>` - overwrite remote file file by local file.
