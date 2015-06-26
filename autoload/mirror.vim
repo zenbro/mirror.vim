@@ -236,6 +236,7 @@ endfunction
 " Open mirrors config in split
 function! mirror#EditConfig()
   execute ':botright split' g:mirror#config_path
+  nnoremap <buffer> <silent> q :<C-U>bdelete<CR>
   setlocal filetype=yaml
 endfunction
 

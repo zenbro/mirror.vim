@@ -72,7 +72,7 @@ There are many other [remote actions](#remote-actions) available.
 ## Configuration
 
 Default path of configuration file is *~/.mirrors*.
-Use `g:mirror#config_path` if you want to change location of configuration file. To open configuration file use `:MirrorConfig` command.
+Use `g:mirror#config_path` if you want to change location of configuration file. To open configuration file use `:MirrorConfig` command. Use `q` to close it.
 
 Configuration file use simplified [YAML](https://en.wikipedia.org/wiki/YAML) format and doesn't support things like &links, arrays, inline objects.
 
@@ -116,8 +116,7 @@ If you open any file inside your projects directories, then you should be able t
 
 This command is available everywhere.
 
- * `:MirrorConfig` - open configuration file in split. Configuration
-   file path can be changed by `g:mirror#config_path`.
+ * `:MirrorConfig` - open configuration file in split. Use `q` to close it. Configuration file path can be changed by `g:mirror#config_path`.
 
 ### Local
 
