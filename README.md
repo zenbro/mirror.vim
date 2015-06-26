@@ -116,7 +116,8 @@ If you open any file inside your projects directories, then you should be able t
 
 This command is available everywhere.
 
- * `:MirrorConfig` - open configuration file in split. Use `q` to close it. Configuration file path can be changed by `g:mirror#config_path`.
+ * `:MirrorConfig` - open configuration file in split. Use `q` to close it.  
+ Configuration file path can be changed by `g:mirror#config_path`.
 
 ### Local
 
@@ -140,7 +141,8 @@ To change default environment for current project use one of the following comma
 
  * `:MirrorEnvironment` - show default environment for current project.
  * `:MirrorEnvironment environment>` - set default `<environment>` for current session.
- * `:MirrorEnvironment! <environment>` - set default `<environment>` globally. Path, where default environments is saved can be changed by `g:mirror#cache_dir`.
+ * `:MirrorEnvironment! <environment>` - set default `<environment>` globally.  
+ Path, where default environments is saved can be changed by `g:mirror#cache_dir`.
 
 #### Remote actions
 
@@ -150,7 +152,8 @@ Remote file - version of local file on remote server.
 * `:MirrorEdit <environment>` - open remote version of a local file.
   * `:MirrorSEdit <environment>` - open remote version of a local file in horizontal split.
   * `:MirrorVEdit <environment>` - open remote version of a local file in vertical split.
-* `:MirrorDiff <environment>` - open vertical split with difference between remote and local file. Use `:diffoff` to exit diff mode.  Use `g:mirror#diff_layout` to change default split layout for this command.
+* `:MirrorDiff <environment>` - open vertical split with difference between remote and local file.  
+Use `:diffoff` to exit diff mode.  Use `g:mirror#diff_layout` to change default split layout for this command.
   * `:MirrorSDiff <environment>` - open horizontal split with difference between remote and local file.
   * `:MirrorVEdit <environment>` - open vertical split with difference between remote and local file.
 * `:MirrorPush <environment>` - overwrite remote file file by local file.
@@ -178,10 +181,10 @@ let g:netrw_silent = 1
 * `g:mirror#open_with` - file explorer command that used in `:MirrorOpen`, `:MirrorRoot`, `:MirrorParentDir`. If you want to open file explorer in horizontal split - you can use `'Sexplore'`. See also `:h netrw-explore`.
 * `g:mirror#diff_layout` - split layout for `:MirrorDiff` command.
 * `g:mirror#cache_dir` - directory where cache is stored. Currently used for saving default environments, that set via `:MirrorEnvironment! <environment>`.
-* `g:netrw_silent` - this variable is related to netrw configuration.
+* `g:netrw_silent` - this variable is related to netrw configuration.  
 Possible values:
   * 0 - transfers done normally (you should see what's going on under the hood when using `MirrorEdit` or `MirrorDiff`)
-  * 1 - transfers done silently
+  * 1 - transfers done silently  
 Silent mode will be used by default.
 
 ## FAQ
