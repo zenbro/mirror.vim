@@ -329,8 +329,12 @@ function! mirror#Do(env, type, command)
 endfunction
 
 " Return list of available environments for current projects
-function! s:EnvCompletion(...)
-  return keys(s:CurrentMirrors())
+function! s:EnvCompletion(arg_lead, ...)
+  if empty(a:arg_lead)
+    return keys(s:CurrentMirrors())
+  else
+    return filter(keys(s:CurrentMirrors()), 'a:arg_lead == v:val[: len(a:arg_lead) - 1]')
+  endif
 endfunction
 
 " Add Mirror* commands for current buffer
