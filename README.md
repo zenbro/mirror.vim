@@ -93,18 +93,15 @@ It should be available by doing these commands:
 ssh project1@staging_host
 cd current
 ```
-*project2@another_host:23//opt/project2* - remote path for environment "*staging*" of project "*project2*". Path "*/opt/project2*" is related to system root directory on host "*another_host*".
+
+* *project2@another_host:23//opt/project2* - remote path for environment "*staging*" of project "*project2*". Path "*/opt/project2*" is related to system root directory on host "*another_host*".
 It should be available by doing these commands:
 
 ```bash
 ssh -p 23 project2@another_host
 cd /opt/project2
 ```
-* *project2@another_host:23//opt/project2* - path */opt/project2* is related to system root directory on host *another_host*. It should be available by doing these commands:
-```
-ssh -p 23 project2@staging_host
-cd /opt/project2
-```
+
 If you open any file inside your projects directories, then you should be able to do environment-specific remote actions.
 
 
