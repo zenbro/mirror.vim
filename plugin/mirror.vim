@@ -30,7 +30,7 @@ augroup updateMirrorConfigAndCache
         \ call mirror#ProjectDiscovery()
   execute 'autocmd BufWritePost' g:mirror#config_path
     \ 'call mirror#ReadConfig() | '
-    \ 'call mirror#ProjectDiscovery()'
+    \ 'bufdo call mirror#ProjectDiscovery()'
 augroup END
 
 augroup projectWithMirrorDetect
