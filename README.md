@@ -180,7 +180,7 @@ Remote file - version of local file on remote server.
 * `:MirrorOpen <environment>` - open remote project directory in file explorer (netrw).
 * `:MirrorRoot <environment>` - open remote system root directory in file explorer.
 * `:MirrorParentDir <environment>` - open remote parent directory of local file.
-* `:MirrorSSH <environment>` - establish ssh connection with selected `<environment>`.
+* `:MirrorSSH <environment>` - establish ssh connection with selected `<environment>` and jump to the remote project directory. Use `g:mirror#ssh_auto_cd` to change default behaviour. See also `g:mirror#ssh_shell`.
 * `:MirrorInfo <environment>` - get information about remote file.
 
 
@@ -192,6 +192,8 @@ This is all available options with their defaults:
 let g:mirror#config_path = '~/.mirrors'
 let g:mirror#open_with = 'Explore'
 let g:mirror#diff_layout = 'vsplit'
+let g:mirror#ssh_auto_cd = 1
+let g:mirror#ssh_shell = '$SHELL --login'
 let g:mirror#cache_dir = '~/.cache/mirror.vim'
 let g:netrw_silent = 1
 ```
@@ -199,6 +201,12 @@ let g:netrw_silent = 1
 * `g:mirror#config_path` - location of configuration file.
 * `g:mirror#open_with` - file explorer command that used in `:MirrorOpen`, `:MirrorRoot`, `:MirrorParentDir`. If you want to open file explorer in horizontal split - you can use `'Sexplore'`. See also `:h netrw-explore`.
 * `g:mirror#diff_layout` - split layout for `:MirrorDiff` command.
+* `g:mirror#ssh_auto_cd` - auto jump to the remote project directory after establishing an SSH connection with `:MirrorSSH`.
+* `g:mirror#ssh_shell` - command for starting shell (e.g. bash, zsh) after ssh
+connection and changing directory. Used only if `g:mirror#ssh_auto_cd` enabled.
+By default, shell will be invoked as "login shell" and all scripts such as
+`/etc/profile` and `~/.profile` will be loaded. It's necessary for tools like
+[RVM](https://rvm.io/) (Ruby Version Manager).
 * `g:mirror#cache_dir` - directory where cache is stored. Currently used for saving default environments, that set via `:MirrorEnvironment! <environment>`.
 * `g:netrw_silent` - this variable is related to netrw configuration.  
 Possible values:

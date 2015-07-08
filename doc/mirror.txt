@@ -196,7 +196,7 @@ Remote file - version of local file on remote server.
 
 :MirrorDiff {environment}                                        *:MirrorDiff*
           Open vertical split with difference between remote and local file.
-          Use |diffoff| to exit diff mode.  Use |g:mirror#diff_layout| to
+          Use |diffoff| to exit diff mode. Use |g:mirror#diff_layout| to
           change default split layout for this command.
 
 :MirrorSDiff {environment}                                      *:MirrorSDiff*
@@ -221,7 +221,9 @@ Remote file - version of local file on remote server.
           Open remote parent directory of local file.
 
 :MirrorSSH {environment}                                          *:MirrorSSH*
-          Establish ssh connection with selected {environment}.
+          Establish ssh connection with selected {environment} and jump to the
+          remote project directory. Use |g:mirror#ssh_auto_cd| to change
+          default behaviour. See also |g:mirror#ssh_shell|.
 
 :MirrorInfo {environment}                                        *:MirrorInfo*
           Get information about remote file.
@@ -244,6 +246,24 @@ Remote file - version of local file on remote server.
 *g:mirror#diff_layout*
           Split layout for |:MirrorDiff| command.
           Default value is `'vsplit'`
+
+*g:mirror#ssh_auto_cd*
+          Auto jump to the remote project directory after establishing an SSH
+          connection with |:MirrorSSH|.
+          Default value is `1`
+
+*g:mirror#ssh_shell*
+          Used only if |g:mirror#ssh_auto_cd| enabled.
+          Command for starting shell (e.g. bash, zsh) after ssh connection and
+          changing directory.
+          Example of command that will be used in |MirrorSSH|:
+>
+          ssh -p 23 user@host -t 'cd my_project && $SHELL --login'
+<
+          By default, shell will be invoked as "login shell" and all scripts
+          such as `/etc/profile` and `~/.profile` will be loaded. It's
+          necessary for tools like RVM (Ruby Version Manager).
+          Default value is `'$SHELL` `--login'`
 
 *g:mirror#cache_dir*
           Directory where cache is stored. Currently used for saving default
@@ -287,8 +307,19 @@ See http://opensource.org/licenses/MIT
 ==============================================================================
 9. Changelog                                                *mirror-changelog*
 
+v1.1.0      2015-07-08
+    * Auto change directory after establishing SSH connection
+
+v1.0.2      2015-06-27
+    * Use silent mode for netrw
+    * Improve environments autocomplete
+    * Perform project discovery for each buffer after saving config
+    * Quick way to close configuration file - q
+    * Fix typos in readme and documentation
+
 v1.0.1      2015-06-25
     * Fix project discovery algorithm
+
 v1.0.0      2015-06-24
     * Initial stable release.
 

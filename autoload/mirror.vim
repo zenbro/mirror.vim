@@ -31,6 +31,8 @@ let g:autoloaded_mirror = 1
 let g:mirror#config_path = get(g:, 'mirror#config_path', $HOME . '/.mirrors')
 let g:mirror#open_with = get(g:, 'mirror#open_with', 'Explore')
 let g:mirror#diff_layout = get(g:, 'mirror#diff_layout', 'vsplit')
+let g:mirror#ssh_auto_cd = get(g:, 'mirror#ssh_auto_cd', 1)
+let g:mirror#ssh_shell = get(g:, 'mirror#ssh_shell', '$SHELL --login')
 let g:mirror#cache_dir = get(
       \ g:, 'mirror#cache_dir',
       \ $HOME . '/.cache/mirror.vim'
@@ -222,8 +224,14 @@ endfunction
 " Establish ssh connection with remote host
 function! s:SSHConnection(env)
   let [_, remote_path] = s:FindPaths(a:env)
-  let [host, port, _] = s:ParseRemotePath(remote_path)
-  execute '!' . s:SSHCommand(host, port)
+  let [host, port, path] = s:ParseRemotePath(remote_path)
+  let ssh_command = s:SSHCommand(host, port)
+  if g:mirror#ssh_auto_cd
+    " change directory to remote project path and start shell
+    let ssh_command .= printf(" -t 'cd %s && %s'", path, g:mirror#ssh_shell)
+  endif
+  " example: ssh -p 23 user@host -t 'cd my_project && $SHELL --login'
+  execute '!' . ssh_command
 endfunction
 
 " Get information about remote file by executing ls -lh
@@ -392,6 +400,5 @@ function! mirror#ProjectDiscovery()
     endif
   endfor
 endfunction
-
 
 " vim: foldmethod=marker
