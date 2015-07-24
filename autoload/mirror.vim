@@ -231,7 +231,11 @@ function! s:SSHConnection(env)
     let ssh_command .= printf(" -t 'cd %s && %s'", path, g:mirror#ssh_shell)
   endif
   " example: ssh -p 23 user@host -t 'cd my_project && $SHELL --login'
-  execute '!' . ssh_command
+  if has('nvim')
+    execute 'terminal ' . ssh_command
+  else
+    execute '!' . ssh_command
+  endif
 endfunction
 
 " Get information about remote file by executing ls -lh
@@ -316,14 +320,16 @@ function! mirror#Do(env, type, command)
   if !empty(env)
     if a:type ==# 'file'
       call s:OpenFile(env, a:command)
+      redraw!
+    elseif a:type ==# 'diff'
+      call s:OpenDiff(env, a:command)
+      redraw!
     elseif a:type ==# 'project_dir'
       call s:OpenProjectDir(env, a:command)
     elseif a:type ==# 'parent_dir'
       call s:OpenParentDir(env, a:command)
     elseif a:type ==# 'root_dir'
       call s:OpenRootDir(env, a:command)
-    elseif a:type ==# 'diff'
-      call s:OpenDiff(env, a:command)
     elseif a:type ==# 'push'
       call s:PushFile(env)
     elseif a:type ==# 'pull'
