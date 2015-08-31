@@ -111,7 +111,7 @@ endfunction
 " Extract host, port and path from remote_path
 function! s:ParseRemotePath(remote_path)
   " scp://host:port/path
-  let m = matchlist(a:remote_path,'^scp://\(.\{-}\):\?\(\d\+\)\?/\(.\+\)$')
+  let m = matchlist(a:remote_path, '^scp://\(.\{-}\)\%(:\(\d\+\)\)\?/\(.\+\)$')
   let host = m[1]
   let port = m[2]
   let path = m[3]
@@ -162,6 +162,7 @@ function! s:OpenFile(env, command)
   let [local_path, remote_path] = s:FindPaths(a:env)
   let full_path = remote_path . local_path
   execute ':' . a:command full_path
+  redraw!
 endfunction
 
 " Find buffer that starts with 'scp://' and delete it
@@ -320,10 +321,8 @@ function! mirror#Do(env, type, command)
   if !empty(env)
     if a:type ==# 'file'
       call s:OpenFile(env, a:command)
-      redraw!
     elseif a:type ==# 'diff'
       call s:OpenDiff(env, a:command)
-      redraw!
     elseif a:type ==# 'project_dir'
       call s:OpenProjectDir(env, a:command)
     elseif a:type ==# 'parent_dir'
