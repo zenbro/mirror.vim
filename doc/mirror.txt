@@ -307,6 +307,11 @@ See http://opensource.org/licenses/MIT
 ==============================================================================
 9. Changelog                                                *mirror-changelog*
 
+v1.1.1      2015-09-01
+    * Add support for nvim-terminal for MirrorSSH
+    * Improve regexp for remote path parsing
+    * Fix diff behavior for multiple splits
+
 v1.1.0      2015-07-08
     * Auto change directory after establishing SSH connection
 
