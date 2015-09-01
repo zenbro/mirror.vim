@@ -172,8 +172,9 @@ endfunction
 
 " Open diff with remote file for given env
 function! s:OpenDiff(env, command)
+  diffthis
   call s:OpenFile(a:env, a:command)
-  windo diffthis
+  diffthis
 endfunction
 
 " Open remote project directory for given env
