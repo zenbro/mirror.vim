@@ -28,15 +28,12 @@ if exists('g:autoloaded_mirror')
 endif
 let g:autoloaded_mirror = 1
 
-let g:mirror#config_path = get(g:, 'mirror#config_path', $HOME . '/.mirrors')
+let g:mirror#config_path = expand(get(g:, 'mirror#config_path', '~/.mirrors'))
 let g:mirror#open_with = get(g:, 'mirror#open_with', 'Explore')
 let g:mirror#diff_layout = get(g:, 'mirror#diff_layout', 'vsplit')
 let g:mirror#ssh_auto_cd = get(g:, 'mirror#ssh_auto_cd', 1)
 let g:mirror#ssh_shell = get(g:, 'mirror#ssh_shell', '$SHELL --login')
-let g:mirror#cache_dir = get(
-      \ g:, 'mirror#cache_dir',
-      \ $HOME . '/.cache/mirror.vim'
-      \ )
+let g:mirror#cache_dir = expand(get(g:, 'mirror#cache_dir', '~/.cache/mirror.vim'))
 let g:netrw_silent = get(g:, 'netrw_silent', 1)
 
 let g:mirror#config = {}
