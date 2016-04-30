@@ -201,23 +201,73 @@ function! s:OpenRootDir(env, command)
   execute ':' . a:command printf('scp://%s//', host)
 endfunction
 
+" Neovim async job handler
+function s:JobHandler(job_id, data, event)
+  if a:event == 'stderr'
+    " Saving error message
+    let self.error = join(a:data, '')
+  elseif a:event == 'exit'
+    " Process exited with error
+    if has_key(self, 'error')
+      echo self.type . ' failed "' . self.error . '"'
+    " Success exit
+    else
+      if self.type == 'MirrorPull'
+        " Reload the local file that was just updated
+        let current_buffer = bufnr('%')
+        execute 'buffer ' . self.buffer_number
+        edit!
+        " Go back to the file we edited
+        if current_buffer != self.buffer_number
+          execute 'buffer ' . current_buffer
+        end
+      end
+      echo self.message
+    end
+  end
+endfunction
+
+let s:callbacks = {
+      \ 'on_stdout': function('s:JobHandler'),
+      \ 'on_stderr': function('s:JobHandler'),
+      \ 'on_exit': function('s:JobHandler')
+      \ }
+
+" Executing commands asynchronously or synchronously
+function! s:ExecuteCommand(type, command, message)
+  if has('nvim')
+    let job_args = extend({
+          \ 'type': a:type,
+          \ 'message': a:message,
+          \ 'buffer_number': bufnr('%')
+          \ }, s:callbacks)
+    call jobstart(a:command, job_args)
+  else
+    execute '!' . a:command
+    if !v:shell_error
+      " Reload the local file that was just updated
+      if a:type == 'MirrorPull'
+        edit!
+      end
+      echo a:message
+    endif
+  endif
+endfunction
+
 " Overwrite remote file with currently opened file
 function! s:PushFile(env)
   let [port, local_file, remote_file] = s:PrepareToCopy(a:env)
-  execute '!' . s:ScpCommand(port, local_file, remote_file)
-  if !v:shell_error
-    echo 'Pushed to' remote_file
-  endif
+  let command = s:ScpCommand(port, local_file, remote_file)
+  let message = 'Pushed to ' . remote_file
+  call s:ExecuteCommand('MirrorPush', command, message)
 endfunction
 
 " Overwrite local file by remote_file
 function! s:PullFile(env)
   let [port, local_file, remote_file] = s:PrepareToCopy(a:env)
-  execute '!' . s:ScpCommand(port, remote_file, local_file)
-  if !v:shell_error
-    edit!
-    echo 'Pulled from' remote_file
-  endif
+  let command = s:ScpCommand(port, remote_file, local_file)
+  let message = 'Pulled from ' . remote_file
+  call s:ExecuteCommand('MirrorPull', command, message)
 endfunction
 
 " Establish ssh connection with remote host
