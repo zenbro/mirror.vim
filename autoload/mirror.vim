@@ -209,6 +209,7 @@ function s:JobHandler(job_id, data, event)
   elseif a:event == 'exit'
     " Process exited with error
     if has_key(self, 'error')
+      redraw!
       echo self.type . ' failed "' . self.error . '"'
     " Success exit
     else
