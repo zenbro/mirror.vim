@@ -175,12 +175,12 @@ Remote file - version of local file on remote server.
 * `:MirrorDiff <environment>` - open vertical split with difference between remote and local file. Use `:diffoff` to exit diff mode.  Use `g:mirror#diff_layout` to change default split layout for this command.
   * `:MirrorSDiff <environment>` - open horizontal split with difference between remote and local file.
   * `:MirrorVEdit <environment>` - open vertical split with difference between remote and local file.
-* `:MirrorPush <environment>` - overwrite remote file by local file.
-* `:MirrorPull <environment>` - overwrite local file by remote file.
+* `:MirrorPush <environment>` - overwrite remote file by local file. If you are using neovim, the command will be executed asynchronously, otherwise synchronously.
+* `:MirrorPull <environment>` - overwrite local file by remote file. If you are using neovim, the command will be executed asynchronously, otherwise synchronously.
 * `:MirrorOpen <environment>` - open remote project directory in file explorer (netrw).
 * `:MirrorRoot <environment>` - open remote system root directory in file explorer.
 * `:MirrorParentDir <environment>` - open remote parent directory of local file.
-* `:MirrorSSH <environment>` - establish ssh connection with selected `<environment>` and jump to the remote project directory. Use `g:mirror#ssh_auto_cd` to change default behaviour. See also `g:mirror#ssh_shell`.
+* `:MirrorSSH <environment>` - establish ssh connection with selected `<environment>` and jump to the remote project directory. Use `g:mirror#ssh_auto_cd` to change default behaviour. See also `g:mirror#ssh_shell`. If you are using neovim, the command will be executed in a new terminal buffer.
 * `:MirrorInfo <environment>` - get information about remote file.
 
 
@@ -189,16 +189,16 @@ Remote file - version of local file on remote server.
 This is all available options with their defaults:
 
 ```vim
-let g:mirror#config_path = '~/.mirrors'
+let g:mirror#config_path = expand('~/.mirrors')
 let g:mirror#open_with = 'Explore'
 let g:mirror#diff_layout = 'vsplit'
 let g:mirror#ssh_auto_cd = 1
 let g:mirror#ssh_shell = '$SHELL --login'
-let g:mirror#cache_dir = '~/.cache/mirror.vim'
+let g:mirror#cache_dir = expand('~/.cache/mirror.vim')
 let g:netrw_silent = 1
 ```
 
-* `g:mirror#config_path` - location of configuration file.
+* `g:mirror#config_path` - location of configuration file. If you have unusual home path - use `expand()`, for example: `let g:mirror#config_path = expand('~/.mirrors')`
 * `g:mirror#open_with` - file explorer command that used in `:MirrorOpen`, `:MirrorRoot`, `:MirrorParentDir`. If you want to open file explorer in horizontal split - you can use `'Sexplore'`. See also `:h netrw-explore`.
 * `g:mirror#diff_layout` - split layout for `:MirrorDiff` command.
 * `g:mirror#ssh_auto_cd` - auto jump to the remote project directory after establishing an SSH connection with `:MirrorSSH`.
@@ -220,6 +220,11 @@ Silent mode will be used by default.
 
 A. Use [SSH config](http://nerderati.com/2011/03/17/simplify-your-life-with-an-ssh-config-file/)
 or passwordless authentication with [SSH-keys](https://wiki.archlinux.org/index.php/SSH_keys).
+
+**Q. What if my development environment is also on a remote server?**
+
+A. You can mount any directory from remote server via
+[sshfs](https://wiki.archlinux.org/index.php/SSHFS).
 
 ## License
 

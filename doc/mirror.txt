@@ -206,10 +206,12 @@ Remote file - version of local file on remote server.
           Open vertical split with difference between remote and local file.
 
 :MirrorPush {environment}                                        *:MirrorPush*
-          Overwrite remote file by local file.
+          Overwrite remote file by local file. If you are using neovim, the
+          command will be executed asynchronously, otherwise synchronously.
 
 :MirrorPull {environment}                                        *:MirrorPull*
-          Overwrite local file by remote file.
+          Overwrite local file by remote file. If you are using neovim, the
+          command will be executed asynchronously, otherwise synchronously.
 
 :MirrorOpen {environment}                                        *:MirrorOpen*
           Open remote project directory in file explorer (|netrw|).
@@ -223,7 +225,8 @@ Remote file - version of local file on remote server.
 :MirrorSSH {environment}                                          *:MirrorSSH*
           Establish ssh connection with selected {environment} and jump to the
           remote project directory. Use |g:mirror#ssh_auto_cd| to change
-          default behaviour. See also |g:mirror#ssh_shell|.
+          default behaviour. See also |g:mirror#ssh_shell|. If you are using
+          neovim, the command will be executed in a new terminal buffer.
 
 :MirrorInfo {environment}                                        *:MirrorInfo*
           Get information about remote file.
@@ -235,6 +238,9 @@ Remote file - version of local file on remote server.
 *g:mirror#config_path*
           Location of configuration file.
           Default value is `'~/.mirrors'`
+          If you have unusual home path - use |expand()|, for example:
+>
+          let g:mirror#config_path = expand('~/.mirrors')
 
 *g:mirror#open_with*
           File explorer command that used in |:MirrorOpen|, |:MirrorRoot| and
@@ -289,6 +295,10 @@ You can get more information here:
 http://nerderati.com/2011/03/17/simplify-your-life-with-an-ssh-config-file/
 https://wiki.archlinux.org/index.php/SSH_keys
 
+Q. What if my development environment is also on a remote server?
+A. You can mount any directory from remote server via sshfs:
+https://wiki.archlinux.org/index.php/SSHFS
+
 ==============================================================================
 7. About                                                        *mirror-about*
 
@@ -306,6 +316,9 @@ See http://opensource.org/licenses/MIT
 
 ==============================================================================
 9. Changelog                                                *mirror-changelog*
+
+v1.2.0      2016-04-30
+    * Add support for nvim job control for MirrorPush and MirrorPull commands
 
 v1.1.1      2015-09-01
     * Add support for nvim-terminal for MirrorSSH
