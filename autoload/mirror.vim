@@ -231,7 +231,7 @@ function! s:SSHConnection(env)
   endif
   " example: ssh -p 23 user@host -t 'cd my_project && $SHELL --login'
   if has('nvim')
-    execute 'terminal ' . ssh_command
+    execute 'tabnew | terminal ' . ssh_command
   else
     execute '!' . ssh_command
   endif
