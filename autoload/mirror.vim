@@ -205,14 +205,13 @@ endfunction
 function s:JobHandler(job_id, data, event)
   if a:event == 'stderr'
     " Saving error message
-    let self.error = join(a:data, '')
+    if !has_key(self, 'stderr')
+      let self.stderr = ''
+    end
+    let self.stderr .= join(a:data, '')
   elseif a:event == 'exit'
-    " Process exited with error
-    if has_key(self, 'error')
-      redraw!
-      echo self.type . ' failed "' . self.error . '"'
     " Success exit
-    else
+    if a:data == 0
       if self.type == 'MirrorPull'
         " Reload the local file that was just updated
         let current_buffer = bufnr('%')
@@ -224,6 +223,14 @@ function s:JobHandler(job_id, data, event)
         end
       end
       echo self.message
+    " Process exited with error
+    else
+      redraw!
+      let message = self.type . ' failed'
+      if has_key(self, 'stderr')
+        let message .= ' "' . self.stderr . '"'
+      end
+      echo message
     end
   end
 endfunction
