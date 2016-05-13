@@ -56,12 +56,38 @@ function! s:ParseMirrors(list)
     if empty(line) || match(line, '\s\*#') != -1
       continue
     endif
+    " extract project
     if match(line, '^\s\+') == -1
       let current_node = substitute(line, ':$', '', '')
-      let result[current_node] = {}
+      " expand glob
+      if match(current_node, '*') != -1
+        let dirs = filter(split(expand(current_node), '\n'), 'isdirectory(v:val)')
+        " create new project path for each directory in expanded glob
+        for dir in dirs
+          let result[dir] = {}
+        endfor
+      " nothing to expand, save new project path
+      else
+        let result[expand(current_node)] = {}
+      endif
+    " extract environment and remote_path
     else
-      let [env, remote_path] = s:GetEnvironmentAndPath(line)
-      let result[current_node][env] = remote_path
+      let wildcard_index = match(current_node, '*')
+      " expand and save remote path for each directory in expanded project path
+      if wildcard_index != -1
+        let dirs = filter(split(expand(current_node), '\n'), 'isdirectory(v:val)')
+        for dir in dirs
+          let wildcard_path = strpart(dir, wildcard_index)
+          " replace wildcards in remote_path with its actually contents from project path
+          let expanded_line = substitute(line, '*', wildcard_path, 'g')
+          let [env, remote_path] = s:GetEnvironmentAndPath(expanded_line)
+          let result[dir][env] = remote_path
+        endfor
+      " nothing to expand, just save remote_path as is
+      else
+        let [env, remote_path] = s:GetEnvironmentAndPath(line)
+        let result[expand(current_node)][env] = remote_path
+      endif
     endif
   endfor
   return result

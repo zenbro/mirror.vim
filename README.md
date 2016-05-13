@@ -102,9 +102,12 @@ Example of mirrors config:
   production: project1@production_host/current
 /home/user/work/project2:
   staging: project2@another_host:23//opt/project2
+/home/user/work/projects/*:
+  devel: project2@some_host//some/workplace/*/src/*
 ```
 
-* */home/user/work/project1*, */home/user/work/project2* - names of working directories for each project. See also [Project discovery](#project-discovery).
+* */home/user/work/project1*, */home/user/work/project2* - names of working directories for each project. See also [Project discovery](#project-discovery). */home/user/work/projects/* - match all projects in *projects* directory.
+
 * *staging*, *production* - names of environments for each projects. You can use whatever name you want when adding environments.
 * *project1@staging_host/current* - remote path for environment "*staging*" of project "*project1*". Path "*current*" is related to home directory of user "*project1*" on host "*staging_host*".
 It should be available by doing these commands:
@@ -122,6 +125,22 @@ ssh -p 23 project2@another_host
 cd /opt/project2
 ```
 
+Third example a little bit complex. Lets assume that the `projects` directory
+contains the following directories: `ProjectA`, `ProjectB`, `ProjectC`.
+Then the following project path and remote path
+```yaml
+  /home/user/work/projects/*:
+    devel: project2@some_host//some/workplace/*/src/*
+```
+would be expanded like this
+```yaml
+  /home/user/work/projects/ProjectA:
+    devel: project2@some_host//some/workplace/ProjectA/src/ProjectA
+  /home/user/work/projects/ProjectB:
+    devel: project2@some_host//some/workplace/ProjectB/src/ProjectB
+  /home/user/work/projects/ProjectC:
+    devel: project2@some_host//some/workplace/ProjectC/src/ProjectC
+```
 If you open any file inside your projects directories, then you should be able
 to do environment-specific remote actions.
 
@@ -152,6 +171,8 @@ In summary, project discovery will be done after following actions:
  * `BufNewFile` 
  * `BufReadPost` 
  * `BufWritePost g:mirror#config_path` (saving configuration file)
+
+Project discovery can be manually triggered via `:MirrorConfigReload`.
 
 #### Default environment
 
