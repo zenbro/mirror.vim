@@ -40,6 +40,9 @@ augroup END
 
 command! MirrorConfig call mirror#EditConfig()
 
+command! MirrorConfigReload call mirror#ReadConfig() |
+      \ call mirror#ProjectDiscovery()
+
 nnoremap <silent> <Plug>(mirror_close_remote_buffer)
       \ :call mirror#CloseRemoteBuffer()<CR>
 

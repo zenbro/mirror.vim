@@ -140,6 +140,10 @@ This command is available everywhere.
           Open configuration file in split. Use `q` to close it.
           Configuration file path can be changed by |g:mirror#config_path|.
 
+:MirrorConfigReload                                      *:MirrorConfigReload*
+          If configuration file has been changed from the outside, it can be
+          reloaded manually via this command.
+
 ------------------------------------------------------------------------------
 4.2 Local                                              *mirror-commands-local*
 
