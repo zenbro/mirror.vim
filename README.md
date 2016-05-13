@@ -106,7 +106,7 @@ Example of mirrors config:
   devel: project2@some_host//some/workplace/*/src/*
 ```
 
-* */home/user/work/project1*, */home/user/work/project2* - names of working directories for each project. See also [Project discovery](#project-discovery). */home/user/work/projects/* - match all projects in *projects* directory.
+* */home/user/work/project1*, */home/user/work/project2* - names of working directories for each project. See also [Project discovery](#project-discovery). */home/user/work/projects/* - match all projects in "*projects*" directory.
 
 * *staging*, *production* - names of environments for each projects. You can use whatever name you want when adding environments.
 * *project1@staging_host/current* - remote path for environment "*staging*" of project "*project1*". Path "*current*" is related to home directory of user "*project1*" on host "*staging_host*".
@@ -125,8 +125,8 @@ ssh -p 23 project2@another_host
 cd /opt/project2
 ```
 
-Third example a little bit complex. Lets assume that the `projects` directory
-contains the following directories: `ProjectA`, `ProjectB`, `ProjectC`.
+Third example a little bit complex. Lets assume that the "*projects*" directory
+contains the following directories: "*ProjectA*", "*ProjectB*", "*ProjectC*".
 Then the following project path and remote path
 ```yaml
   /home/user/work/projects/*:
