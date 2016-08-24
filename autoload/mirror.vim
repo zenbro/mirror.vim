@@ -34,6 +34,7 @@ let g:mirror#diff_layout = get(g:, 'mirror#diff_layout', 'vsplit')
 let g:mirror#ssh_auto_cd = get(g:, 'mirror#ssh_auto_cd', 1)
 let g:mirror#ssh_shell = get(g:, 'mirror#ssh_shell', '$SHELL --login')
 let g:mirror#cache_dir = expand(get(g:, 'mirror#cache_dir', '~/.cache/mirror.vim'))
+let g:mirror#spawn_command = '!'
 let g:netrw_silent = get(g:, 'netrw_silent', 1)
 
 let g:mirror#config = {}
@@ -277,7 +278,7 @@ function! s:ExecuteCommand(type, command, message)
           \ }, s:callbacks)
     call jobstart(a:command, job_args)
   else
-    execute '!' . a:command
+    execute g:mirror#spawn_command . a:command
     if !v:shell_error
       " Reload the local file that was just updated
       if a:type == 'MirrorPull'
@@ -317,7 +318,7 @@ function! s:SSHConnection(env)
   if has('nvim')
     execute 'tabnew | terminal ' . ssh_command
   else
-    execute '!' . ssh_command
+    execute g:mirror#spawn_command . ssh_command
   endif
 endfunction
 
@@ -326,7 +327,7 @@ endfunction
 function! s:GetFileInfo(env)
   let [local_path, remote_path] = s:FindPaths(a:env)
   let [host, port, path] = s:ParseRemotePath(remote_path . local_path)
-  execute '!' . s:SSHCommand(host, port) 'ls -lh' path
+  execute g:mirror#spawn_command . s:SSHCommand(host, port) 'ls -lh' path
 endfunction
 
 " Open mirrors config in split
