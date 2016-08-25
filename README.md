@@ -219,6 +219,7 @@ let g:mirror#ssh_auto_cd = 1
 let g:mirror#ssh_shell = '$SHELL --login'
 let g:mirror#cache_dir = expand('~/.cache/mirror.vim')
 let g:netrw_silent = 1
+let g:mirror#spawn_command = '! '
 ```
 
 * `g:mirror#config_path` - location of configuration file. If you have unusual home path - use `expand()`, for example: `let g:mirror#config_path = expand('~/.mirrors')`
@@ -236,6 +237,8 @@ Possible values:
   * 0 - transfers done normally (you should see what's going on under the hood when using `:MirrorEdit` or `:MirrorDiff` commands)
   * 1 - transfers done silently  
 Silent mode will be used by default.
+* `g:mirror#spawn_command` - vim command in this variable is used for executing _scp_ when copying files. In original vim copying files to remote server will have blocking behavior, in neovim - async. If you want to use [dispatch.vim](https://github.com/tpope/vim-dispatch) - add this to your *.vimrc*:
+`let g:mirror#spawn_command = ':Start '`
 
 ## FAQ
 

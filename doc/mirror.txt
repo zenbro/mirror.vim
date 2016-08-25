@@ -309,6 +309,16 @@ Remote file - version of local file on remote server.
           1 - transfers done silently
           Silent mode will be used by default.
 
+*g:mirror#spawn_command*
+          Vim command in this variable is used for executing scp when copying files. In
+          original vim copying files to remote server will have blocking behavior, in
+          neovim - async.
+          If you want to use dispatch.vim - add this to your .vimrc:
+>
+          let g:mirror#spawn_command = ':Start '
+<
+          Default value is '! '
+
 ==============================================================================
 6. FAQ                                                            *mirror-faq*
 
