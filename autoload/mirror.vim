@@ -229,7 +229,7 @@ function! s:OpenRootDir(env, command)
 endfunction
 
 " Neovim async job handler
-function s:JobHandler(job_id, data, event)
+function s:JobHandler(job_id, data, event) dict abort
   if a:event == 'stderr'
     " Saving error message
     if !has_key(self, 'stderr')
